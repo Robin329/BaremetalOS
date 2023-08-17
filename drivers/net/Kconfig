@@ -1,7 +1,4 @@
 source "drivers/net/phy/Kconfig"
-source "drivers/net/pfe_eth/Kconfig"
-source "drivers/net/fsl-mc/Kconfig"
-
 config ETH
 	def_bool y
 
@@ -177,8 +174,6 @@ config BCMGENET
 	select PHYLIB
 	help
 	  This driver supports the BCMGENET Ethernet MAC.
-
-source "drivers/net/bnxt/Kconfig"
 
 config CORTINA_NI_ENET
 	bool "Cortina-Access Ethernet driver"
@@ -622,9 +617,6 @@ config PCNET
 	help
 	  This driver supports AMD PCnet series fast ethernet family of
 	  PCI chipsets/adapters.
-
-source "drivers/net/qe/Kconfig"
-
 config RTL8139
 	bool "Realtek 8139 series Ethernet controller driver"
 	help
@@ -698,8 +690,6 @@ config SH_ETHER
 	select PHYLIB
 	help
 	  This driver supports the Ethernet for Renesas SH and ARM SoCs.
-
-source "drivers/net/ti/Kconfig"
 
 config TULIP
 	bool "DEC Tulip DC2114x Ethernet support"
@@ -795,8 +785,6 @@ config SNI_NETSEC
 	help
 	  This driver implements support for the Socionext SynQuacer NETSEC
 	  ethernet controller, as found on the Socionext SynQuacer family.
-
-source "drivers/net/mscc_eswitch/Kconfig"
 
 config ETHER_ON_FEC1
 	bool "FEC1"

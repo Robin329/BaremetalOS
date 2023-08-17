@@ -762,7 +762,4 @@ config SYS_I2C_IHS
         depends on DM_I2C
         help
           Support for gdsys IHS I2C driver on FPGA bus.
-
-source "drivers/i2c/muxes/Kconfig"
-
 endif

@@ -3,10 +3,7 @@
 # Copyright (C) 2017 Texas Instruments Incorporated - http://www.ti.com/
 # Written by Jean-Jacques Hiblot  <jjhiblot@ti.com>
 
-obj-y += allwinner/
-obj-y += marvell/
 obj-y += rockchip/
-obj-y += socionext/
 
 obj-$(CONFIG_$(SPL_)PHY) += phy-uclass.o
 obj-$(CONFIG_$(SPL_)NOP_PHY) += nop-phy.o
@@ -38,7 +35,3 @@ obj-$(CONFIG_PHY_MTK_TPHY) += phy-mtk-tphy.o
 obj-$(CONFIG_PHY_NPCM_USB) += phy-npcm-usb.o
 obj-$(CONFIG_PHY_IMX8MQ_USB) += phy-imx8mq-usb.o
 obj-$(CONFIG_PHY_XILINX_ZYNQMP) += phy-zynqmp.o
-obj-y += cadence/
-obj-y += ti/
-obj-y += qcom/
-obj-y += renesas/

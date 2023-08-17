@@ -238,8 +238,6 @@ config SYS_MAX_FLASH_BANKS_DETECT
 	 to reduce the effective number of flash bank, between 0 and
 	 CONFIG_SYS_MAX_FLASH_BANKS
 
-source "drivers/mtd/nand/Kconfig"
-
 config SYS_NAND_MAX_OOBFREE
 	int "Maximum number of free OOB regions supported"
 	depends on SAMSUNG_ONENAND || MTD_RAW_NAND
@@ -267,9 +265,5 @@ config SYS_NAND_MAX_CHIPS
 	  The maximum number of NAND chips per device to be supported.
 
 source "drivers/mtd/spi/Kconfig"
-
-source "drivers/mtd/ubi/Kconfig"
-
-source "drivers/mtd/nvmxip/Kconfig"
 
 endmenu
