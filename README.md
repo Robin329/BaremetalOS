@@ -1,5 +1,7 @@
 # Baremetal OS
 
+[![Build Status](https://github.com/Robin329/BaremetalOS/actions/workflows/main.yml/badge.svg)](https://github.com/Robin329/BaremetalOS/actions/workflows/main.yml)
+
 In order to support Arm Trust Firmware(ATF), we can use either SPL or
 miniloader from rockchip to do:
 * do DRAM init
