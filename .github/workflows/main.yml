@@ -1,0 +1,27 @@
+name: Build U-Boot
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches: [ "master"]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: install deps
+        run: |
+          sudo apt install -y python3 libx11-xcb-dev libx11-dev libgbm-dev libevdev-dev libfmt-dev gcc-aarch64-linux-gnu
+          pip install pyelftools
+      - name: configure
+        run: |
+          make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- distclean
+          make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-  roc-pc-rk3399_defconfig
+      - name: Build
+        run: make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-  -j32
