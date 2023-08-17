@@ -6,6 +6,7 @@
 
 /* #define	DEBUG	*/
 
+#include "linux/kconfig.h"
 #include <common.h>
 #include <autoboot.h>
 #include <bootstage.h>
@@ -64,8 +65,8 @@ void main_loop(void)
 	s = bootdelay_process();
 	if (cli_process_fdt(&s))
 		cli_secure_boot_cmd(s);
-
-	autoboot_command(s);
+	if(!IS_ENABLED(CONFIG_ABORT_BOOT_OPTION))
+		autoboot_command(s);
 
 	cli_loop();
 	panic("No CLI available");

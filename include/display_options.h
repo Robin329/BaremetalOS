@@ -82,7 +82,7 @@ int hexdump_line(ulong addr, const void *data, uint width, uint count,
 int display_options(void);
 
 /* Suggested length of the buffer to pass to display_options_get_banner() */
-#define DISPLAY_OPTIONS_BANNER_LENGTH	200
+#define DISPLAY_OPTIONS_BANNER_LENGTH	1024
 
 /**
  * display_options_get_banner() - Get the U-Boot banner as a string

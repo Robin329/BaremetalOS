@@ -48,7 +48,7 @@ char *get_reset_cause(void)
 int print_cpuinfo(void)
 {
 	char *cause = get_reset_cause();
-	printf("\nWelcome to Baremetal OS\n");
+	printf("\n\nWelcome to Baremetal OS\n\n");
 	printf("SoC: Rockchip %s\n", CONFIG_SYS_SOC);
 	printf("Reset cause: %s\n", cause);
 

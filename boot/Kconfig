@@ -1270,6 +1270,12 @@ config BOOTDELAY
 
 	  See doc/README.autoboot for details.
 
+config ABORT_BOOT_OPTION
+	bool "Abort autoboot"
+	default y
+	help
+	  Abort auto boot option.
+
 config AUTOBOOT_KEYED
 	bool "Stop autobooting via specific input key / string"
 	help
