@@ -21,7 +21,7 @@ jobs:
           pip install pyelftools
       - name: configure
         run: |
-          make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- distclean
-          make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-  roc-pc-rk3399_defconfig
+          make  CROSS_COMPILE=aarch64-linux-gnu- distclean
+          make  CROSS_COMPILE=aarch64-linux-gnu-  roc-pc-rk3399_defconfig
       - name: Build
-        run: make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-  -j32
+        run: make  CROSS_COMPILE=aarch64-linux-gnu-  -j32

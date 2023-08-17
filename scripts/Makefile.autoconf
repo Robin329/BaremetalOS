@@ -126,6 +126,7 @@ include/config.h: scripts/Makefile.autoconf create_symlink FORCE
 # If arch/$(ARCH)/mach-$(SOC)/include/mach exists,
 # make a symbolic link to that directory.
 # Otherwise, create a symbolic link to arch/$(ARCH)/include/asm/arch-$(SOC).
+$(warning "SOC:$(SOC)")
 PHONY += create_symlink
 create_symlink:
 ifdef CONFIG_CREATE_ARCH_SYMLINK
