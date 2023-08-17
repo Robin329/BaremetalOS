@@ -17,7 +17,8 @@ jobs:
         uses: actions/checkout@v2
       - name: install deps
         run: |
-          sudo apt install -y python3 libx11-xcb-dev libx11-dev libgbm-dev libevdev-dev libfmt-dev gcc-aarch64-linux-gnu
+          sudo apt-get update
+          sudo apt-get install -y python3 libx11-xcb-dev libx11-dev libgbm-dev libevdev-dev libfmt-dev gcc-aarch64-linux-gnu
           pip install pyelftools
       - name: configure
         run: |
