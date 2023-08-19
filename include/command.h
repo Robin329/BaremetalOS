@@ -446,8 +446,18 @@ int cmd_source_script(ulong addr, const char *fit_uname, const char *confname);
 
 #endif /* CONFIG_CMDLINE */
 
+#ifndef CONFIG_BAREMETAL_OS
 #define U_BOOT_CMD(_name, _maxargs, _rep, _cmd, _usage, _help)		\
 	U_BOOT_CMD_COMPLETE(_name, _maxargs, _rep, _cmd, _usage, _help, NULL)
+
+#define BARE_BOOT_CMD(_name, _maxargs, _rep, _cmd, _usage, _help)
+#else
+#define U_BOOT_CMD(_name, _maxargs, _rep, _cmd, _usage, _help)
+
+#define BARE_BOOT_CMD(_name, _maxargs, _rep, _cmd, _usage, _help)              \
+	U_BOOT_CMD_COMPLETE(_name, _maxargs, _rep, _cmd, _usage, _help, NULL)
+
+#endif
 
 #define U_BOOT_CMD_MKENT(_name, _maxargs, _rep, _cmd, _usage, _help)	\
 	U_BOOT_CMD_MKENT_COMPLETE(_name, _maxargs, _rep, _cmd,		\

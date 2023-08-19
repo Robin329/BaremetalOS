@@ -78,7 +78,7 @@
 		work_led: led-0 {
 			label = "green:work";
 			gpios = <&gpio2 RK_PD3 GPIO_ACTIVE_HIGH>;
-			default-state = "on";
+			default-state = "off";
 			linux,default-trigger = "heartbeat";
 		};
 

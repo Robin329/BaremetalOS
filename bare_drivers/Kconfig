@@ -1,0 +1,23 @@
+menu "Bare Device Drivers"
+
+config BAREMETAL_OS
+    bool "Baremetal OS Enable"
+    default y
+    help
+      Enable Baremetal OS drivers.
+
+if BAREMETAL_OS
+
+config BAREMETAL_REG_DEBUG
+    bool "Enable register print debug"
+    default n
+    help
+      Enable baremetal OS registers print.
+
+source "bare_drivers/hello/Kconfig"
+
+source "bare_drivers/leds/Kconfig"
+
+endif
+
+endmenu

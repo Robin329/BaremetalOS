@@ -9,7 +9,8 @@
 #include <common.h>
 #include <dm.h>
 #include <panel.h>
-
+#undef debug
+#define debug printf
 int panel_enable_backlight(struct udevice *dev)
 {
 	struct panel_ops *ops = panel_get_ops(dev);

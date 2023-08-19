@@ -29,12 +29,8 @@ obj-$(CONFIG_VIDEO_LOGO) += u_boot_logo.o
 endif
 
 obj-$(CONFIG_BACKLIGHT_LM3533) += lm3533_backlight.o
-obj-${CONFIG_EXYNOS_FB} += exynos/
+
 obj-${CONFIG_VIDEO_ROCKCHIP} += rockchip/
-obj-${CONFIG_VIDEO_STM32} += stm32/
-obj-${CONFIG_VIDEO_TEGRA124} += tegra124/
-obj-${CONFIG_$(SPL_)VIDEO_TIDSS} += tidss/
-obj-y += ti/
 
 obj-$(CONFIG_ATMEL_HLCD) += atmel_hlcdfb.o
 obj-$(CONFIG_ATMEL_LCD) += atmel_lcdfb.o
@@ -76,5 +72,4 @@ obj-$(CONFIG_VIDEO_SEPS525) += seps525.o
 obj-$(CONFIG_VIDEO_ZYNQMP_DPSUB) += zynqmp_dpsub.o
 
 obj-y += bridge/
-obj-y += sunxi/
-obj-y += tegra20/
+

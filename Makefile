@@ -848,6 +848,7 @@ libs-y += lib/
 libs-y += fs/
 libs-y += net/
 libs-y += disk/
+libs-y += bare_drivers/
 libs-y += drivers/
 libs-$(CONFIG_SYS_FSL_DDR) += drivers/ddr/fsl/
 libs-$(CONFIG_SYS_FSL_MMDC) += drivers/ddr/fsl/

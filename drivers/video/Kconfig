@@ -255,8 +255,6 @@ config PANEL_HX8238D
 	  It can drive a maximum 960x240 dot graphics on a-TFT panel
 	  displays in 16M colors with dithering.
 
-source "drivers/video/fonts/Kconfig"
-
 config VIDCONSOLE_AS_LCD
 	bool "Use 'vidconsole' when CONFIG_VIDCONSOLE_AS_NAME string is seen in stdout"
 	help
@@ -594,7 +592,6 @@ config VIDEO_LCD_SPI_MISO
 	option takes a string in the format understood by 'sunxi_name_to_gpio'
 	function, e.g. PH1 for pin 1 of port H.
 
-source "drivers/video/meson/Kconfig"
 
 config VIDEO_MVEBU
 	bool "Armada XP LCD controller"
@@ -643,10 +640,6 @@ config BACKLIGHT_LM3533
 	  Say Y to enable the backlight driver for National Semiconductor / TI
 	  LM3533 Lighting Power chip. Only Bank A is supported as for now.
 	  Supported backlight level range is from 2 to 255 with step of 1.
-
-source "drivers/video/ti/Kconfig"
-
-source "drivers/video/exynos/Kconfig"
 
 config LOGICORE_DP_TX
 	bool "Enable Logicore DP TX driver"
@@ -702,9 +695,6 @@ config VIDEO_SANDBOX_SDL
 	  console device and can display stdout output. Within U-Boot is is
 	  a normal bitmap display and can display images as well as text.
 
-source "drivers/video/stm32/Kconfig"
-
-source "drivers/video/tidss/Kconfig"
 
 config VIDEO_TEGRA124
 	bool "Enable video support on Tegra124"
@@ -715,10 +705,6 @@ config VIDEO_TEGRA124
 	   have an eDP display connected.
 
 source "drivers/video/bridge/Kconfig"
-
-source "drivers/video/tegra20/Kconfig"
-
-source "drivers/video/imx/Kconfig"
 
 config VIDEO_MXS
 	bool "Enable video support on i.MX28/i.MX6UL/i.MX7 SoCs"
@@ -747,8 +733,6 @@ config VIDEO_ZYNQMP_DPSUB
 	  Enable support for Xilinx ZynqMP Display Port. Currently this file
 	  is used as placeholder for driver. The main reason is to record
 	  compatible string and calling power domain driver.
-
-source "drivers/video/nexell/Kconfig"
 
 config CONSOLE_SCROLL_LINES
 	int "Number of lines to scroll the console by"
@@ -972,7 +956,6 @@ config SPL_VIDEO
 	  used as U-Boot proper.
 
 if SPL_VIDEO
-source "drivers/video/tidss/Kconfig"
 
 config SPL_VIDEO_LOGO
 	bool "Show the U-Boot logo on the display at SPL"

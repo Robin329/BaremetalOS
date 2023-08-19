@@ -1,0 +1,19 @@
+#
+# Hello infrastructure and drivers
+#
+
+menuconfig BAREMETAL_HELLO
+    bool "HELLO Driver support"
+    default n
+    help
+      Enable support for hello driver test.
+
+if BAREMETAL_HELLO
+
+config BAREMETAL_HELLO_PRINT
+    bool "Enable Baremetal Hello Driver For BaremetalOS"
+    default y
+    help
+      Enable hello driver support.
+
+endif

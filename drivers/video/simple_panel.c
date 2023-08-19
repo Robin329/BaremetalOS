@@ -13,6 +13,8 @@
 #include <asm/gpio.h>
 #include <power/regulator.h>
 
+#undef debug
+#define debug printf
 struct simple_panel_priv {
 	struct udevice *reg;
 	struct udevice *backlight;

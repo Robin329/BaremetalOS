@@ -182,7 +182,7 @@ static int rockchip_gpio_probe(struct udevice *dev)
 	int ret;
 
 	priv->regs = dev_read_addr_ptr(dev);
-
+	printf("gpio reg:%#x\n", priv->regs);
 	if (CONFIG_IS_ENABLED(PINCTRL)) {
 		ret = uclass_first_device_err(UCLASS_PINCTRL, &priv->pinctrl);
 		if (ret)

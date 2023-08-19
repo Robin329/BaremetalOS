@@ -13,7 +13,8 @@
 #include <media_bus_format.h>
 #include <linux/delay.h>
 #include "dw_hdmi.h"
-
+#undef debug
+#define debug printf
 struct tmds_n_cts {
 	u32 tmds;
 	u32 cts;

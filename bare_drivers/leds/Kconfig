@@ -1,0 +1,10 @@
+#
+# Leds infrastructure and drivers
+#
+
+menuconfig BAREMETAL_LED
+    bool "LED Driver support"
+    depends on LED && LED_GPIO
+    default n
+    help
+      Enable support for LED driver test.

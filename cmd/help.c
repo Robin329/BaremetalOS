@@ -28,6 +28,12 @@ U_BOOT_CMD(
 	"	- print detailed usage of 'command'"
 );
 
+BARE_BOOT_CMD(help, CONFIG_SYS_MAXARGS, 1, do_help,
+	   "print command description/usage",
+	   "\n"
+	   "	- print brief description of all commands\n"
+	   "help command ...\n"
+	   "	- print detailed usage of 'command'");
 #ifdef CONFIG_CMDLINE
 /* This does not use the U_BOOT_CMD macro as ? can't be used in symbol names */
 ll_entry_declare(struct cmd_tbl, question_mark, cmd) = {
