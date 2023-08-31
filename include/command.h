@@ -452,10 +452,11 @@ int cmd_source_script(ulong addr, const char *fit_uname, const char *confname);
 
 #define BARE_BOOT_CMD(_name, _maxargs, _rep, _cmd, _usage, _help)
 #else
-#define U_BOOT_CMD(_name, _maxargs, _rep, _cmd, _usage, _help)
 
 #define BARE_BOOT_CMD(_name, _maxargs, _rep, _cmd, _usage, _help)              \
 	U_BOOT_CMD_COMPLETE(_name, _maxargs, _rep, _cmd, _usage, _help, NULL)
+
+#define U_BOOT_CMD  BARE_BOOT_CMD
 
 #endif
 

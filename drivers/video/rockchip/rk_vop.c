@@ -29,7 +29,8 @@
 #include <linux/err.h>
 #include <power/regulator.h>
 #include "rk_vop.h"
-
+#undef debug
+#define debug printf
 DECLARE_GLOBAL_DATA_PTR;
 
 enum vop_pol {
@@ -154,6 +155,7 @@ static void rkvop_enable_output(struct udevice *dev, enum vop_modes mode)
 	default:
 		debug("%s: unsupported output mode %x\n", __func__, mode);
 	}
+
 }
 
 static void rkvop_mode_set(struct udevice *dev,
@@ -218,6 +220,7 @@ static void rkvop_mode_set(struct udevice *dev,
 	       &regs->post_dsp_vact_info);
 
 	writel(0x01, &regs->reg_cfg_done); /* enable reg config */
+
 }
 
 /**
@@ -409,6 +412,7 @@ void rk_vop_probe_regulators(struct udevice *dev,
 		if (!ret)
 			ret = regulator_set_enable(reg, true);
 	}
+
 }
 
 int rk_vop_probe(struct udevice *dev)

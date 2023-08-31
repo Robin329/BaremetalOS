@@ -1317,8 +1317,6 @@ U_BOOT_CMD(
 	"memory display",
 	"[.b, .w, .l" HELP_Q "] address [# of objects]"
 );
-BARE_BOOT_CMD(md, 3, 1, do_mem_md, "memory display",
-	      "[.b, .w, .l" HELP_Q "] address [# of objects]");
 
 U_BOOT_CMD(
 	mm,	2,	1,	do_mem_mm,
@@ -1338,8 +1336,6 @@ U_BOOT_CMD(
 	"memory write (fill)",
 	"[.b, .w, .l" HELP_Q "] address value [count]"
 );
-BARE_BOOT_CMD(mw, 4, 1, do_mem_mw, "memory write (fill)",
-	      "[.b, .w, .l" HELP_Q "] address value [count]");
 
 U_BOOT_CMD(
 	cp,	4,	1,	do_mem_cp,

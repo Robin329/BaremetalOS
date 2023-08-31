@@ -1,12 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0+
 
 dtb-$(CONFIG_ROCKCHIP_RK3399) += \
-	rk3399-roc-pc.dtb \
-	rk3399-rock-4c-plus.dtb \
-	rk3399-rock-pi-4a.dtb \
-	rk3399-rock-pi-4c.dtb \
-	rk3399-rock960.dtb \
-	rk3399-rockpro64.dtb
+	rk3399-roc-pc.dtb
 
 
 dtb-$(CONFIG_ARCH_QEMU) += qemu-arm.dtb qemu-arm64.dtb

@@ -816,7 +816,7 @@ int printf(const char *fmt, ...)
 {
 	va_list args;
 	uint i;
-
+	puts("[B-OS] : ");
 	va_start(args, fmt);
 	i = vprintf(fmt, args);
 	va_end(args);

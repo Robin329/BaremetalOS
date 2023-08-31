@@ -24,7 +24,8 @@
 #include <dt-bindings/clock/rk3399-cru.h>
 #include <linux/bitops.h>
 #include <linux/delay.h>
-
+#undef debug
+#define debug printf
 DECLARE_GLOBAL_DATA_PTR;
 
 #if CONFIG_IS_ENABLED(OF_PLATDATA)
@@ -1630,6 +1631,7 @@ static int rk3399_pmuclk_probe(struct udevice *dev)
 #ifndef CONFIG_SPL_BUILD
 	pmuclk_init(priv->pmucru);
 #endif
+
 	return 0;
 }
 
@@ -1654,6 +1656,7 @@ static int rk3399_pmuclk_bind(struct udevice *dev)
 	if (ret)
 		debug("Warning: software reset driver bind failed\n");
 #endif
+
 	return 0;
 }
 

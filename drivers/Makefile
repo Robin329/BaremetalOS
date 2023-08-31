@@ -12,6 +12,7 @@ obj-$(CONFIG_$(SPL_TPL_)I2C) += i2c/
 obj-$(CONFIG_$(SPL_TPL_)INPUT) += input/
 obj-$(CONFIG_$(SPL_TPL_)LED) += led/
 obj-$(CONFIG_$(SPL_TPL_)MMC) += mmc/
+obj-$(CONFIG_$(SPL_TPL_)POWER) += power/
 obj-y += mtd/
 obj-$(CONFIG_$(SPL_TPL_)ETH) += net/
 

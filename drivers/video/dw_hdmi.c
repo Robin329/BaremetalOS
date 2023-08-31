@@ -953,6 +953,7 @@ void dw_hdmi_phy_init(struct dw_hdmi *hdmi)
 
 	/* clear hotplug interrupts */
 	hdmi_write(hdmi, HDMI_IH_PHY_STAT0_HPD, HDMI_IH_PHY_STAT0);
+
 }
 
 int dw_hdmi_read_edid(struct dw_hdmi *hdmi, u8 *buf, int buf_size)
@@ -1028,9 +1029,10 @@ void dw_hdmi_init(struct dw_hdmi *hdmi)
 	if (hdmi->write_reg)
 		hdmi_write = hdmi->write_reg;
 
+	printf("hdmi_write:%#x\n", hdmi_write);
 	if (hdmi->read_reg)
 		hdmi_read = hdmi->read_reg;
-
+	printf("hdmi_read:%#x\n", hdmi_read);
 	hdmi_write(hdmi, ih_mute, HDMI_IH_MUTE);
 
 	/* enable i2c master done irq */

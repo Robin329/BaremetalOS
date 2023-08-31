@@ -103,6 +103,7 @@ int rk_hdmi_of_to_plat(struct udevice *dev)
 void rk_hdmi_probe_regulators(struct udevice *dev,
 			      const char * const *names, int cnt)
 {
+
 	rk_vop_probe_regulators(dev, names, cnt);
 }
 
