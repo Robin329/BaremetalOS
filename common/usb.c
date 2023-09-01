@@ -91,7 +91,7 @@ int usb_init(void)
 		 */
 		controllers_initialized++;
 		start_index = dev_index;
-		printf("scanning bus %d for devices... ", i);
+		printf("scanning bus %d for devices... \n", i);
 		ret = usb_alloc_new_device(ctrl, &dev);
 		if (ret)
 			break;

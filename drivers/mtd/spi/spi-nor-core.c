@@ -4203,11 +4203,11 @@ int spi_nor_scan(struct spi_nor *nor)
 	nor->sector_size = mtd->erasesize;
 
 #ifndef CONFIG_SPL_BUILD
-	printf("SF: Detected %s with page size ", nor->name);
-	print_size(nor->page_size, ", erase size ");
-	print_size(nor->erase_size, ", total ");
-	print_size(nor->size, "");
-	puts("\n");
+	// printf("SF: Detected %s with page size ", nor->name);
+	// print_size(nor->page_size, ", erase size ");
+	// print_size(nor->erase_size, ", total ");
+	// print_size(nor->size, "");
+	// puts("\n");
 #endif
 
 	return 0;

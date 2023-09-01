@@ -224,7 +224,7 @@ static void usb_scan_bus(struct udevice *bus, bool recurse)
 
 	assert(recurse);	/* TODO: Support non-recusive */
 
-	printf("scanning bus %s for devices... ", bus->name);
+	printf("scanning bus %s for devices... \n", bus->name);
 	debug("\n");
 	ret = usb_scan_device(bus, 0, USB_SPEED_FULL, &dev);
 	if (ret)

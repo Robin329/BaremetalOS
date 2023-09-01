@@ -29,8 +29,7 @@
 #include <linux/err.h>
 #include <power/regulator.h>
 #include "rk_vop.h"
-#undef debug
-#define debug printf
+
 DECLARE_GLOBAL_DATA_PTR;
 
 enum vop_pol {

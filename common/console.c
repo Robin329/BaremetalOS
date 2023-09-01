@@ -1013,25 +1013,25 @@ int console_init_f(void)
 void stdio_print_current_devices(void)
 {
 	/* Print information */
-	printf("In:    ");
+	// printf("In:    ");
 	if (stdio_devices[stdin] == NULL) {
 		printf("No input devices available!\n");
 	} else {
-		printf ("%s\n", stdio_devices[stdin]->name);
+		// printf ("%s\n", stdio_devices[stdin]->name);
 	}
 
-	printf("Out:   ");
+	// printf("Out:   ");
 	if (stdio_devices[stdout] == NULL) {
 		printf("No output devices available!\n");
 	} else {
-		printf ("%s\n", stdio_devices[stdout]->name);
+		// printf ("%s\n", stdio_devices[stdout]->name);
 	}
 
-	printf("Err:   ");
+	// printf("Err:   ");
 	if (stdio_devices[stderr] == NULL) {
 		printf("No error devices available!\n");
 	} else {
-		printf ("%s\n", stdio_devices[stderr]->name);
+		// printf ("%s\n", stdio_devices[stderr]->name);
 	}
 }
 

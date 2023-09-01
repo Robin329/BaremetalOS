@@ -200,7 +200,7 @@ static int print_cpuinfo(void)
 
 static int announce_dram_init(void)
 {
-	printf("DRAM:  \n");
+	// printf("DRAM:  \n");
 	return 0;
 }
 
@@ -239,24 +239,24 @@ static int show_dram_config(void)
 	unsigned long long size;
 	int i;
 
-	printf("\nRAM Configuration:\n");
+	// printf("\nRAM Configuration:\n");
 	for (i = size = 0; i < CONFIG_NR_DRAM_BANKS; i++) {
 		size += gd->bd->bi_dram[i].size;
-		printf("Bank #%d: %llx ", i,
-		       (unsigned long long)(gd->bd->bi_dram[i].start));
+		// printf("Bank #%d: %llx ", i,
+		    //    (unsigned long long)(gd->bd->bi_dram[i].start));
 #ifdef DEBUG
 		print_size(gd->bd->bi_dram[i].size, "\n");
 #endif
 	}
-	printf("\nDRAM:  ");
+	// printf("\nDRAM:  ");
 
 	print_size(gd->ram_size, "");
 	if (!sizes_near(gd->ram_size, size)) {
-		puts(" (effective ");
-		print_size(size, ")");
+		// puts(" (effective ");
+		// print_size(size, ")");
 	}
 	board_add_ram_info(0);
-	putc('\n');
+	// putc('\n');
 
 	return 0;
 }

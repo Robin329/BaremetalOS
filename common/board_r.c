@@ -401,7 +401,7 @@ static int initr_onenand(void)
 #ifdef CONFIG_MMC
 static int initr_mmc(void)
 {
-	puts("MMC:   ");
+	// puts("MMC:   ");
 	mmc_initialize(gd->bd);
 	return 0;
 }
@@ -544,10 +544,10 @@ static int dm_announce(void)
 
 	if (IS_ENABLED(CONFIG_DM)) {
 		dm_get_stats(&device_count, &uclass_count);
-		printf("Core:  %d devices, %d uclasses", device_count,
+		printf("Core:  %d devices, %d uclasses\n", device_count,
 		       uclass_count);
 		if (CONFIG_IS_ENABLED(OF_REAL))
-			printf(", devicetree: %s", fdtdec_get_srcname());
+			printf(", devicetree: %s\n", fdtdec_get_srcname());
 		printf("\n");
 		if (IS_ENABLED(CONFIG_OF_HAS_PRIOR_STAGE) &&
 		    (gd->fdt_src == FDTSRC_SEPARATE ||
