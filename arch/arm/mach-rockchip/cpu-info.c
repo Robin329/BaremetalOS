@@ -49,8 +49,8 @@ int print_cpuinfo(void)
 {
 	char *cause = get_reset_cause();
 	printf("\n\nWelcome to Baremetal OS\n\n");
-	printf("SoC: Rockchip %s\n", CONFIG_SYS_SOC);
-	printf("Reset cause: %s\n", cause);
+	blog_info("SoC: Rockchip %s\n", CONFIG_SYS_SOC);
+	blog_info("Reset cause: %s\n", cause);
 
 	/**
 	 * reset_reason env is used by rk3288, due to special use case

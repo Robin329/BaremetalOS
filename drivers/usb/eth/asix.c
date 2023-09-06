@@ -435,16 +435,16 @@ static int asix_init_common(struct ueth_data *dev, uint8_t *enetaddr)
 			BMSR_LSTATUS;
 		if (!link_detected) {
 			if (timeout == 0)
-				printf("Waiting for Ethernet connection... ");
+				blog_info("Waiting for Ethernet connection... ");
 			udelay(TIMEOUT_RESOLUTION * 1000);
 			timeout += TIMEOUT_RESOLUTION;
 		}
 	} while (!link_detected && timeout < PHY_CONNECT_TIMEOUT);
 	if (link_detected) {
 		if (timeout != 0)
-			printf("done.\n");
+			blog_info("done.\n");
 	} else {
-		printf("unable to connect.\n");
+		blog_info("unable to connect.\n");
 		goto out_err;
 	}
 

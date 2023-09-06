@@ -224,15 +224,15 @@ static void usb_scan_bus(struct udevice *bus, bool recurse)
 
 	assert(recurse);	/* TODO: Support non-recusive */
 
-	printf("scanning bus %s for devices... \n", bus->name);
+	blog_info("scanning bus %s for devices... \n", bus->name);
 	debug("\n");
 	ret = usb_scan_device(bus, 0, USB_SPEED_FULL, &dev);
 	if (ret)
-		printf("failed, error %d\n", ret);
+		blog_info("failed, error %d\n", ret);
 	else if (priv->next_addr == 0)
-		printf("No USB Device found\n");
+		blog_info("No USB Device found\n");
 	else
-		printf("%d USB Device(s) found\n", priv->next_addr);
+		blog_info("%d USB Device(s) found\n", priv->next_addr);
 }
 
 static void remove_inactive_children(struct uclass *uc, struct udevice *bus)
@@ -268,7 +268,7 @@ int usb_init(void)
 
 	uclass_foreach_dev(bus, uc) {
 		/* init low_level USB */
-		printf("Bus %s: ", bus->name);
+		blog_info("Bus %s: ", bus->name);
 
 		/*
 		 * For Sandbox, we need scan the device tree each time when we
@@ -283,7 +283,7 @@ int usb_init(void)
 		    IS_ENABLED(CONFIG_USB_ONBOARD_HUB)) {
 			ret = dm_scan_fdt_dev(bus);
 			if (ret) {
-				printf("USB device scan from fdt failed (%d)", ret);
+				blog_info("USB device scan from fdt failed (%d)", ret);
 				continue;
 			}
 		}
@@ -296,7 +296,7 @@ int usb_init(void)
 		}
 
 		if (ret) {		/* Other error. */
-			printf("probe failed, error %d\n", ret);
+			blog_info("probe failed, error %d\n", ret);
 			continue;
 		}
 		controllers_initialized++;
@@ -344,7 +344,7 @@ int usb_init(void)
 
 	/* if we were not able to find at least one working bus, bail out */
 	if (controllers_initialized == 0)
-		printf("No working controllers found\n");
+		blog_info("No working controllers found\n");
 
 	return usb_started ? 0 : -1;
 }

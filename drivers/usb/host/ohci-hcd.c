@@ -61,13 +61,13 @@
 	(OHCI_CTRL_CBSR & 0x3) | OHCI_CTRL_IE | OHCI_CTRL_PLE
 
 #ifdef DEBUG
-#define dbg(format, arg...) printf("DEBUG: " format "\n", ## arg)
+#define dbg(format, arg...) blog_info("DEBUG: " format "\n", ## arg)
 #else
 #define dbg(format, arg...) do {} while (0)
 #endif /* DEBUG */
-#define err(format, arg...) printf("ERROR: " format "\n", ## arg)
+#define err(format, arg...) blog_info("ERROR: " format "\n", ## arg)
 #ifdef SHOW_INFO
-#define info(format, arg...) printf("INFO: " format "\n", ## arg)
+#define info(format, arg...) blog_info("INFO: " format "\n", ## arg)
 #else
 #define info(format, arg...) do {} while (0)
 #endif
@@ -271,20 +271,20 @@ static void pkt_print(ohci_t *ohci, urb_priv_t *purb, struct usb_device *dev,
 		int i, len;
 
 		if (usb_pipecontrol(pipe)) {
-			printf(__FILE__ ": cmd(8):");
+			blog_info(__FILE__ ": cmd(8):");
 			for (i = 0; i < 8 ; i++)
-				printf(" %02x", ((__u8 *) setup) [i]);
-			printf("\n");
+				blog_info(" %02x", ((__u8 *) setup) [i]);
+			blog_info("\n");
 		}
 		if (transfer_len > 0 && buffer) {
-			printf(__FILE__ ": data(%d/%d):",
+			blog_info(__FILE__ ": data(%d/%d):",
 				(purb ? purb->actual_length : 0),
 				transfer_len);
 			len = usb_pipeout(pipe)? transfer_len:
 					(purb ? purb->actual_length : 0);
 			for (i = 0; i < 16 && i < len; i++)
-				printf(" %02x", ((__u8 *) buffer) [i]);
-			printf("%s\n", i < len? "...": "");
+				blog_info(" %02x", ((__u8 *) buffer) [i]);
+			blog_info("%s\n", i < len? "...": "");
 		}
 	}
 #endif
@@ -302,14 +302,14 @@ void ep_print_int_eds(ohci_t *ohci, char *str)
 		if (*ed_p == 0)
 		    continue;
 		invalidate_dcache_ed(ed_p);
-		printf(__FILE__ ": %s branch int %2d(%2x):", str, i, i);
+		blog_info(__FILE__ ": %s branch int %2d(%2x):", str, i, i);
 		while (*ed_p != 0 && j--) {
 			ed_t *ed = (ed_t *)m32_swap(ed_p);
 			invalidate_dcache_ed(ed);
-			printf(" ed: %4x;", ed->hwINFO);
+			blog_info(" ed: %4x;", ed->hwINFO);
 			ed_p = &ed->hwNextED;
 		}
-		printf("\n");
+		blog_info("\n");
 	}
 }
 
@@ -898,8 +898,8 @@ static void td_fill(ohci_t *ohci, unsigned int info,
 #ifdef OHCI_FILL_TRACE
 	if (usb_pipebulk(urb_priv->pipe) && usb_pipeout(urb_priv->pipe)) {
 		for (i = 0; i < len; i++)
-		printf("td->data[%d] %#2x ", i, ((unsigned char *)td->data)[i]);
-		printf("\n");
+		blog_info("td->data[%d] %#2x ", i, ((unsigned char *)td->data)[i]);
+		blog_info("\n");
 	}
 #endif
 	if (!len)
@@ -1461,7 +1461,7 @@ static ohci_dev_t *ohci_get_ohci_dev(ohci_t *ohci, int devnum, int intr)
 		}
 	}
 
-	printf("ohci: Error out of ohci_devs for interrupt endpoints\n");
+	blog_info("ohci: Error out of ohci_devs for interrupt endpoints\n");
 	return NULL;
 }
 
@@ -1474,7 +1474,7 @@ static urb_priv_t *ohci_alloc_urb(struct usb_device *dev, unsigned long pipe,
 
 	urb = calloc(1, sizeof(urb_priv_t));
 	if (!urb) {
-		printf("ohci: Error out of memory allocating urb\n");
+		blog_info("ohci: Error out of memory allocating urb\n");
 		return NULL;
 	}
 
@@ -1607,7 +1607,7 @@ static struct int_queue *_ohci_create_int_queue(ohci_t *ohci,
 
 	queue = malloc(sizeof(*queue));
 	if (!queue) {
-		printf("ohci: Error out of memory allocating int queue\n");
+		blog_info("ohci: Error out of memory allocating int queue\n");
 		return NULL;
 	}
 
@@ -1619,7 +1619,7 @@ static struct int_queue *_ohci_create_int_queue(ohci_t *ohci,
 			break;
 
 		if (sohci_submit_job(ohci, ohci_dev, queue->urb[i], NULL)) {
-			printf("ohci: Error submitting int queue job\n");
+			blog_info("ohci: Error submitting int queue job\n");
 			urb_free_priv(queue->urb[i]);
 			break;
 		}
@@ -1765,13 +1765,13 @@ static int hc_reset(ohci_t *ohci)
 
 		while (ohci_readl(base) & EHCI_USBCMD_HCRESET) {
 			if (timeout-- <= 0) {
-				printf("USB RootHub reset timed out!");
+				blog_info("USB RootHub reset timed out!");
 				break;
 			}
 			udelay(1);
 		}
 	} else
-		printf("No EHCI func at %d index!\n", CONFIG_PCI_EHCI_DEVNO);
+		blog_info("No EHCI func at %d index!\n", CONFIG_PCI_EHCI_DEVNO);
 #endif
 	if (ohci_readl(&ohci->regs->control) & OHCI_CTRL_IR) {
 		/* SMM owns the HC, request ownership */
@@ -2121,7 +2121,7 @@ int ohci_register(struct udevice *dev, struct ohci_regs *regs)
 		return -EIO;
 
 	reg = ohci_readl(&regs->revision);
-	printf("USB OHCI %x.%x\n", (reg >> 4) & 0xf, reg & 0xf);
+	blog_info("USB OHCI %x.%x\n", (reg >> 4) & 0xf, reg & 0xf);
 
 	return 0;
 }

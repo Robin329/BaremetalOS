@@ -325,12 +325,13 @@ static int rk_display_init(struct udevice *dev, ulong fbbase, ofnode ep_node)
 		      __func__, dev_read_name(dev), compat);
 		return -EINVAL;
 	}
-	debug("vop_id=%d\n", vop_id);
+	blog_info("vop_id=%d\n", vop_id);
 
 	disp_uc_plat = dev_get_uclass_plat(disp);
-	debug("Found device '%s', disp_uc_priv=%p\n", disp->name, disp_uc_plat);
+	blog_info("Found device '%s', disp_uc_priv=%p\n", disp->name,
+		  disp_uc_plat);
 	if (display_in_use(disp)) {
-		debug("   - device in use\n");
+		blog_info("   - device in use\n");
 		return -EBUSY;
 	}
 
@@ -339,14 +340,14 @@ static int rk_display_init(struct udevice *dev, ulong fbbase, ofnode ep_node)
 
 	ret = device_probe(disp);
 	if (ret) {
-		debug("%s: device '%s' display won't probe (ret=%d)\n",
-		      __func__, dev->name, ret);
+		blog_info("%s: device '%s' display won't probe (ret=%d)\n",
+			  __func__, dev->name, ret);
 		return ret;
 	}
 
 	ret = display_read_timing(disp, &timing);
 	if (ret) {
-		debug("%s: Failed to read timings\n", __func__);
+		blog_err("%s: Failed to read timings\n", __func__);
 		return ret;
 	}
 
@@ -354,7 +355,8 @@ static int rk_display_init(struct udevice *dev, ulong fbbase, ofnode ep_node)
 	if (!ret)
 		ret = clk_set_rate(&clk, timing.pixelclock.typ);
 	if (IS_ERR_VALUE(ret)) {
-		debug("%s: Failed to set pixel clock: ret=%d\n", __func__, ret);
+		blog_err("%s: Failed to set pixel clock: ret=%d\n", __func__,
+			 ret);
 		return ret;
 	}
 
@@ -378,7 +380,7 @@ static int rk_display_init(struct udevice *dev, ulong fbbase, ofnode ep_node)
 
 	ret = reset_get_by_name(dev, "dclk", &dclk_rst);
 	if (ret) {
-		dev_err(dev, "failed to get dclk reset (ret=%d)\n", ret);
+		blog_err("failed to get dclk reset (ret=%d)\n", ret);
 		return ret;
 	}
 
@@ -391,7 +393,8 @@ static int rk_display_init(struct udevice *dev, ulong fbbase, ofnode ep_node)
 	uc_priv->xsize = timing.hactive.typ;
 	uc_priv->ysize = timing.vactive.typ;
 	uc_priv->bpix = l2bpp;
-	debug("fb=%lx, size=%d %d\n", fbbase, uc_priv->xsize, uc_priv->ysize);
+	blog_info("fb=%lx, size=%d %d\n", fbbase, uc_priv->xsize,
+		  uc_priv->ysize);
 
 	return 0;
 }

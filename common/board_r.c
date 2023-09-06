@@ -312,7 +312,7 @@ static int initr_binman(void)
 
 	ret = binman_init();
 	if (ret)
-		printf("binman_init failed:%d\n", ret);
+		blog_info("binman_init failed:%d\n", ret);
 
 	return ret;
 }
@@ -334,7 +334,7 @@ static int initr_flash(void)
 	puts("Flash: ");
 
 	if (board_flash_wp_on())
-		printf("Uninitialized - Write Protect On\n");
+		blog_info("Uninitialized - Write Protect On\n");
 	else
 		flash_size = flash_init();
 
@@ -348,7 +348,7 @@ static int initr_flash(void)
 	if (env_get_yesno("flashchecksum") == 1) {
 		const uchar *flash_base = (const uchar *)CFG_SYS_FLASH_BASE;
 
-		printf("  CRC: %08X", crc32(0,
+		blog_info("  CRC: %08X", crc32(0,
 					    flash_base,
 					    flash_size));
 	}
@@ -383,7 +383,7 @@ static int initr_nand(void)
 {
 	puts("NAND:  ");
 	nand_init();
-	printf("%lu MiB\n", nand_size() / 1024);
+	blog_info("%lu MiB\n", nand_size() / 1024);
 	return 0;
 }
 #endif
@@ -401,7 +401,7 @@ static int initr_onenand(void)
 #ifdef CONFIG_MMC
 static int initr_mmc(void)
 {
-	// puts("MMC:   ");
+	blog_info("MMC:   ");
 	mmc_initialize(gd->bd);
 	return 0;
 }
@@ -501,7 +501,7 @@ static int initr_scsi(void)
 #ifdef CONFIG_CMD_NET
 static int initr_net(void)
 {
-	printf("Net:   ");
+	blog_info("Net:   ");
 	eth_initialize();
 #if defined(CONFIG_RESET_PHY_R)
 	debug("Reset Ethernet PHY\n");
@@ -544,16 +544,16 @@ static int dm_announce(void)
 
 	if (IS_ENABLED(CONFIG_DM)) {
 		dm_get_stats(&device_count, &uclass_count);
-		printf("Core:  %d devices, %d uclasses\n", device_count,
+		blog_info("Core:  %d devices, %d uclasses\n", device_count,
 		       uclass_count);
 		if (CONFIG_IS_ENABLED(OF_REAL))
-			printf(", devicetree: %s\n", fdtdec_get_srcname());
-		printf("\n");
+			blog_info(", devicetree: %s\n", fdtdec_get_srcname());
+		blog_info("\n");
 		if (IS_ENABLED(CONFIG_OF_HAS_PRIOR_STAGE) &&
 		    (gd->fdt_src == FDTSRC_SEPARATE ||
 		     gd->fdt_src == FDTSRC_EMBED)) {
-			printf("Warning: Unexpected devicetree source (not from a prior stage)");
-			printf("Warning: U-Boot may not function properly\n");
+			blog_info("Warning: Unexpected devicetree source (not from a prior stage)");
+			blog_info("Warning: U-Boot may not function properly\n");
 		}
 		if (IS_ENABLED(CONFIG_OF_TAG_MIGRATE) &&
 		    (gd->flags & GD_FLG_OF_TAG_MIGRATE))
@@ -561,7 +561,7 @@ static int dm_announce(void)
 			 * U-Boot will silently fail to work after 2023.07 if
 			 * there are old tags present
 			 */
-			printf("Warning: Device tree includes old 'u-boot,dm-' tags: please fix by 2023.07!\n");
+			blog_info("Warning: Device tree includes old 'u-boot,dm-' tags: please fix by 2023.07!\n");
 	}
 
 	return 0;

@@ -72,7 +72,7 @@ static void rk_i2c_set_clk(struct rk_i2c *i2c, uint32_t scl_rate)
 	divl = 0;
 	if (div >= 0)
 		rk_i2c_get_div(div, &divh, &divl);
-	writel(I2C_CLKDIV_VAL(divl, divh), &i2c->regs->clkdiv);
+	BREG_W32(I2C_CLKDIV_VAL(divl, divh), &i2c->regs->clkdiv);
 
 	debug("rk_i2c_set_clk: i2c rate = %d, scl rate = %d\n", i2c_rate,
 	      scl_rate);
@@ -107,15 +107,15 @@ static int rk_i2c_send_start_bit(struct rk_i2c *i2c)
 	ulong start;
 
 	debug("I2c Send Start bit.\n");
-	writel(I2C_IPD_ALL_CLEAN, &regs->ipd);
+	BREG_W32(I2C_IPD_ALL_CLEAN, &regs->ipd);
 
-	writel(I2C_CON_EN | I2C_CON_START, &regs->con);
-	writel(I2C_STARTIEN, &regs->ien);
+	BREG_W32(I2C_CON_EN | I2C_CON_START, &regs->con);
+	BREG_W32(I2C_STARTIEN, &regs->ien);
 
 	start = get_timer(0);
 	while (1) {
 		if (readl(&regs->ipd) & I2C_STARTIPD) {
-			writel(I2C_STARTIPD, &regs->ipd);
+			BREG_W32(I2C_STARTIPD, &regs->ipd);
 			break;
 		}
 		if (get_timer(start) > I2C_TIMEOUT_MS) {
@@ -135,15 +135,15 @@ static int rk_i2c_send_stop_bit(struct rk_i2c *i2c)
 	ulong start;
 
 	debug("I2c Send Stop bit.\n");
-	writel(I2C_IPD_ALL_CLEAN, &regs->ipd);
+	BREG_W32(I2C_IPD_ALL_CLEAN, &regs->ipd);
 
-	writel(I2C_CON_EN | I2C_CON_STOP, &regs->con);
-	writel(I2C_CON_STOP, &regs->ien);
+	BREG_W32(I2C_CON_EN | I2C_CON_STOP, &regs->con);
+	BREG_W32(I2C_CON_STOP, &regs->ien);
 
 	start = get_timer(0);
 	while (1) {
 		if (readl(&regs->ipd) & I2C_STOPIPD) {
-			writel(I2C_STOPIPD, &regs->ipd);
+			BREG_W32(I2C_STOPIPD, &regs->ipd);
 			break;
 		}
 		if (get_timer(start) > I2C_TIMEOUT_MS) {
@@ -159,7 +159,7 @@ static int rk_i2c_send_stop_bit(struct rk_i2c *i2c)
 
 static inline void rk_i2c_disable(struct rk_i2c *i2c)
 {
-	writel(0, &i2c->regs->con);
+	BREG_W32(0, &i2c->regs->con);
 }
 
 static int rk_i2c_read(struct rk_i2c *i2c, uchar chip, uint reg, uint r_len,
@@ -184,11 +184,11 @@ static int rk_i2c_read(struct rk_i2c *i2c, uchar chip, uint reg, uint r_len,
 	if (err)
 		return err;
 
-	writel(I2C_MRXADDR_SET(1, chip << 1 | 1), &regs->mrxaddr);
+	BREG_W32(I2C_MRXADDR_SET(1, chip << 1 | 1), &regs->mrxaddr);
 	if (r_len == 0) {
-		writel(0, &regs->mrxraddr);
+		BREG_W32(0, &regs->mrxraddr);
 	} else if (r_len < 4) {
-		writel(I2C_MRXRADDR_SET(r_len, reg), &regs->mrxraddr);
+		BREG_W32(I2C_MRXRADDR_SET(r_len, reg), &regs->mrxraddr);
 	} else {
 		debug("I2C Read: addr len %d not supported\n", r_len);
 		return -EIO;
@@ -216,18 +216,18 @@ static int rk_i2c_read(struct rk_i2c *i2c, uchar chip, uint reg, uint r_len,
 		else
 			con |= I2C_CON_MOD(I2C_MODE_TRX);
 
-		writel(con, &regs->con);
-		writel(bytes_xferred, &regs->mrxcnt);
-		writel(I2C_MBRFIEN | I2C_NAKRCVIEN, &regs->ien);
+		BREG_W32(con, &regs->con);
+		BREG_W32(bytes_xferred, &regs->mrxcnt);
+		BREG_W32(I2C_MBRFIEN | I2C_NAKRCVIEN, &regs->ien);
 
 		start = get_timer(0);
 		while (1) {
 			if (readl(&regs->ipd) & I2C_NAKRCVIPD) {
-				writel(I2C_NAKRCVIPD, &regs->ipd);
+				BREG_W32(I2C_NAKRCVIPD, &regs->ipd);
 				err = -EREMOTEIO;
 			}
 			if (readl(&regs->ipd) & I2C_MBRFIPD) {
-				writel(I2C_MBRFIPD, &regs->ipd);
+				BREG_W32(I2C_MBRFIPD, &regs->ipd);
 				break;
 			}
 			if (get_timer(start) > I2C_TIMEOUT_MS) {
@@ -301,22 +301,22 @@ static int rk_i2c_write(struct rk_i2c *i2c, uchar chip, uint reg, uint r_len,
 					txdata |= (*pbuf++)<<(j * 8);
 				}
 			}
-			writel(txdata, &regs->txdata[i]);
+			BREG_W32(txdata, &regs->txdata[i]);
 			debug("I2c Write TXDATA[%d] = 0x%08x\n", i, txdata);
 		}
 
-		writel(I2C_CON_EN | I2C_CON_MOD(I2C_MODE_TX), &regs->con);
-		writel(bytes_xferred, &regs->mtxcnt);
-		writel(I2C_MBTFIEN | I2C_NAKRCVIEN, &regs->ien);
+		BREG_W32(I2C_CON_EN | I2C_CON_MOD(I2C_MODE_TX), &regs->con);
+		BREG_W32(bytes_xferred, &regs->mtxcnt);
+		BREG_W32(I2C_MBTFIEN | I2C_NAKRCVIEN, &regs->ien);
 
 		start = get_timer(0);
 		while (1) {
 			if (readl(&regs->ipd) & I2C_NAKRCVIPD) {
-				writel(I2C_NAKRCVIPD, &regs->ipd);
+				BREG_W32(I2C_NAKRCVIPD, &regs->ipd);
 				err = -EREMOTEIO;
 			}
 			if (readl(&regs->ipd) & I2C_MBTFIPD) {
-				writel(I2C_MBTFIPD, &regs->ipd);
+				BREG_W32(I2C_MBTFIPD, &regs->ipd);
 				break;
 			}
 			if (get_timer(start) > I2C_TIMEOUT_MS) {

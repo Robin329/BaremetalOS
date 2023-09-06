@@ -160,12 +160,12 @@ static int print_resetinfo(void)
 		}
 
 		if (!sysreset_get_status(dev, status, sizeof(status))) {
-			printf("%s%s", status_printed ? " " : "", status);
+			blog_info("%s%s", status_printed ? " " : "", status);
 			status_printed = true;
 		}
 	}
 	if (status_printed)
-		printf("\n");
+		blog_info("\n");
 
 	return 0;
 }
@@ -192,7 +192,7 @@ static int print_cpuinfo(void)
 		return ret;
 	}
 
-	printf("CPU:   %s\n", desc);
+	blog_info("CPU:   %s\n", desc);
 
 	return 0;
 }
@@ -200,7 +200,7 @@ static int print_cpuinfo(void)
 
 static int announce_dram_init(void)
 {
-	// printf("DRAM:  \n");
+	blog_info("DRAM:  \n");
 	return 0;
 }
 
@@ -239,24 +239,24 @@ static int show_dram_config(void)
 	unsigned long long size;
 	int i;
 
-	// printf("\nRAM Configuration:\n");
+	blog_info("RAM Configuration:\n");
 	for (i = size = 0; i < CONFIG_NR_DRAM_BANKS; i++) {
 		size += gd->bd->bi_dram[i].size;
-		// printf("Bank #%d: %llx ", i,
-		    //    (unsigned long long)(gd->bd->bi_dram[i].start));
+		printf("Bank #%d: %llx ", i,
+		       (unsigned long long)(gd->bd->bi_dram[i].start));
 #ifdef DEBUG
 		print_size(gd->bd->bi_dram[i].size, "\n");
 #endif
 	}
-	// printf("\nDRAM:  ");
+	blog_info("DRAM:  \n");
 
 	print_size(gd->ram_size, "");
 	if (!sizes_near(gd->ram_size, size)) {
-		// puts(" (effective ");
-		// print_size(size, ")");
+		puts(" (effective ");
+		print_size(size, ")");
 	}
 	board_add_ram_info(0);
-	// putc('\n');
+	putc('\n');
 
 	return 0;
 }

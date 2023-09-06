@@ -103,6 +103,8 @@ static inline void __raw_readsl(unsigned long addr, void *data, int longlen)
 		u8 __v = v;                                                    \
 		__iowmb();                                                     \
 		__arch_putb(__v, c);                                           \
+		if (CONFIG_BAREMETAL_REG_DEBUG)                                \
+			blog_info("W           %#x = %#x\n", c, __v);          \
 		__v;                                                           \
 	})
 #define writew(v, c)                                                           \
@@ -110,6 +112,8 @@ static inline void __raw_readsl(unsigned long addr, void *data, int longlen)
 		u16 __v = v;                                                   \
 		__iowmb();                                                     \
 		__arch_putw(__v, c);                                           \
+		if (CONFIG_BAREMETAL_REG_DEBUG)                                \
+			blog_info("W           %#x = %#x\n", c, __v);          \
 		__v;                                                           \
 	})
 #define writel(v, c)                                                           \
@@ -117,6 +121,8 @@ static inline void __raw_readsl(unsigned long addr, void *data, int longlen)
 		u32 __v = v;                                                   \
 		__iowmb();                                                     \
 		__arch_putl(__v, c);                                           \
+		if (CONFIG_BAREMETAL_REG_DEBUG)                                \
+			blog_info("W           %#x = %#x\n", c, __v);          \
 		__v;                                                           \
 	})
 #define writeq(v, c)                                                           \
@@ -124,6 +130,8 @@ static inline void __raw_readsl(unsigned long addr, void *data, int longlen)
 		u64 __v = v;                                                   \
 		__iowmb();                                                     \
 		__arch_putq(__v, c);                                           \
+		if (CONFIG_BAREMETAL_REG_DEBUG)                                \
+			blog_info("W           %#x = %#x\n", c, __v);          \
 		__v;                                                           \
 	})
 
@@ -131,24 +139,32 @@ static inline void __raw_readsl(unsigned long addr, void *data, int longlen)
 	({                                                                     \
 		u8 __v = __arch_getb(c);                                       \
 		__iormb();                                                     \
+		if (CONFIG_BAREMETAL_REG_DEBUG)                                \
+			blog_info("R           %#x = %#x\n", c, __v);          \
 		__v;                                                           \
 	})
 #define readw(c)                                                               \
 	({                                                                     \
 		u16 __v = __arch_getw(c);                                      \
 		__iormb();                                                     \
+		if (CONFIG_BAREMETAL_REG_DEBUG)                                \
+			blog_info("R           %#x = %#x\n", c, __v);          \
 		__v;                                                           \
 	})
 #define readl(c)                                                               \
 	({                                                                     \
 		u32 __v = __arch_getl(c);                                      \
 		__iormb();                                                     \
-		__v;                                                           \
+		if (CONFIG_BAREMETAL_REG_DEBUG)                                \
+			blog_info("R           %#x = %#x\n", c, __v);          \
+ __v;                                                    \
 	})
 #define readq(c)                                                               \
 	({                                                                     \
 		u64 __v = __arch_getq(c);                                      \
 		__iormb();                                                     \
+		if (CONFIG_BAREMETAL_REG_DEBUG)                                \
+			blog_info("R           %#x = %#x\n", c, __v);          \
 		__v;                                                           \
 	})
 
@@ -247,55 +263,97 @@ static inline void __raw_readsl(unsigned long addr, void *data, int longlen)
 #define clrbits_be32(addr, clear)	  clrbits(be32, addr, clear)
 #define setbits_be32(addr, set)		  setbits(be32, addr, set)
 #define clrsetbits_be32(addr, clear, set) clrsetbits(be32, addr, clear, set)
-#if defined(CONFIG_BAREMETAL_REG_DEBUG)
+
+#if CONFIG_IS_ENABLED(BAREMETAL_OS)
+#define BREG_CLR32(addr, clear)                                                \
+	({                                                                     \
+		unsigned int val = in_le32((addr)) & ~(clear);                 \
+		/* clrbits(le32, addr, clear);  */ out_le32((addr), (val));    \
+		if (CONFIG_BAREMETAL_REG_DEBUG)                                \
+			blog_info("clrbits     %#x = %#x\n", (addr), val);     \
+	})
+#define BREG_SET32(addr, set)                                                  \
+	({                                                                     \
+		unsigned int val = in_le32(addr) | (set);                      \
+		/* setbits(le32, addr, set); */ out_le32((addr), val);         \
+		if (CONFIG_BAREMETAL_REG_DEBUG)                                \
+			blog_info("setbits     %#x = %#x\n", addr, val);       \
+	})
+#define BREG_CLRSET32(addr, clear, set)                                        \
+	({                                                                     \
+		unsigned int val = (in_le32((addr)) & ~(clear)) | (set);       \
+		/* clrsetbits(le32, addr, clear, set);  */                     \
+		out_le32((addr), (val));                                       \
+		if (CONFIG_BAREMETAL_REG_DEBUG)                                \
+			blog_info("clrsetbits  %#x = %#x\n", (addr), (val));   \
+	})
+#define BREG_W32(v, a)                                                         \
+	({                                                                     \
+		if (CONFIG_BAREMETAL_REG_DEBUG)                                \
+			blog_info("W           %#x = %#x\n", a, v);            \
+		writel((v), (a));                                              \
+	})
+
+#define BREG_R32(a)                                                            \
+	({                                                                     \
+		unsigned int val = readl((a));                                 \
+		if (CONFIG_BAREMETAL_REG_DEBUG)                                \
+			blog_info("R           %#x = %#x\n", a, val);          \
+		val;                                                           \
+	})
+#else
+#define BREG_CLR32(addr, clear)		clrbits(le32, addr, clear)
+#define BREG_SET32(addr, set)		setbits(le32, addr, set)
+#define BREG_CLRSET32(addr, clear, set) clrsetbits(le32, addr, clear, set)
+#define BREG_W32(v, a)			writel(v, a)
+#define BREG_R32(a)			readl(a)
+#endif
+
 #define clrbits_le32(addr, clear)                                              \
 	do {                                                                   \
 		unsigned int val = in_le32((addr)) & ~(clear);                 \
 		/* clrbits(le32, addr, clear);  */ out_le32((addr), (val));    \
-		printf("clrbits     %#x = %#x\n", (addr), val);                    \
+		if (CONFIG_BAREMETAL_REG_DEBUG)                                \
+			blog_info("clrbits     %#x = %#x\n", (addr), val);     \
 	} while (0)
 #define setbits_le32(addr, set)                                                \
 	do {                                                                   \
 		unsigned int val = in_le32(addr) | (set);                      \
 		/* setbits(le32, addr, set); */ out_le32((addr), val);         \
-		printf("setbits     %#x = %#x\n", addr, val);                      \
+		if (CONFIG_BAREMETAL_REG_DEBUG)                                \
+			blog_info("setbits     %#x = %#x\n", addr, val);       \
 	} while (0)
 #define clrsetbits_le32(addr, clear, set)                                      \
 	do {                                                                   \
 		unsigned int val = (in_le32((addr)) & ~(clear)) | (set);       \
 		/* clrsetbits(le32, addr, clear, set);  */                     \
 		out_le32((addr), (val));                                       \
-		printf("clrsetbits  %#x = %#x\n", (addr), (val));               \
+		if (CONFIG_BAREMETAL_REG_DEBUG)                                \
+			blog_info("clrsetbits  %#x = %#x\n", (addr), (val));   \
 	} while (0);
 
 #define clrbits_32(addr, clear)                                                \
 	do {                                                                   \
-		unsigned int set = in_32(addr) & ~(clear);                  \
-		/* clrbits(32, addr, clear);  */ out_32((addr), (set));      \
-		printf("clrbits     %#x = %#x\n", addr, set);                      \
+		unsigned int set = in_32(addr) & ~(clear);                     \
+		/* clrbits(32, addr, clear);  */ out_32((addr), (set));        \
+		if (CONFIG_BAREMETAL_REG_DEBUG)                                \
+			blog_info("clrbits     %#x = %#x\n", addr, set);       \
 	} while (0)
 #define setbits_32(addr, set)                                                  \
 	do {                                                                   \
 		unsigned int val = in_32(addr) | (set);                        \
 		/* setbits(32, addr, set); */ out_32((addr), val);             \
-		printf("setbits     %#x = %#x\n", addr, val);                      \
+		if (CONFIG_BAREMETAL_REG_DEBUG)                                \
+			blog_info("setbits     %#x = %#x\n", addr, val);       \
 	} while (0)
 #define clrsetbits_32(addr, clear, set)                                        \
 	do {                                                                   \
 		unsigned int val = (in_32(addr) & ~(clear)) | (set);           \
 		/* clrsetbits(32, addr, clear, set);  */ out_32((addr), val);  \
-		printf("clrsetbits  %#x = %#x\n", addr, val);                   \
+		if (CONFIG_BAREMETAL_REG_DEBUG)                                \
+			blog_info("clrsetbits  %#x = %#x\n", addr, val);       \
 	} while (0)
-#else
-#define clrbits_le32(addr, clear)	  clrbits(le32, addr, clear)
-#define setbits_le32(addr, set)		  setbits(le32, addr, set)
-#define clrsetbits_le32(addr, clear, set) clrsetbits(le32, addr, clear, set)
 
-#define clrbits_32(addr, clear)		clrbits(32, addr, clear)
-#define setbits_32(addr, set)		setbits(32, addr, set)
-#define clrsetbits_32(addr, clear, set) clrsetbits(32, addr, clear, set)
-
-#endif
 #define clrbits_be16(addr, clear)	  clrbits(be16, addr, clear)
 #define setbits_be16(addr, set)		  setbits(be16, addr, set)
 #define clrsetbits_be16(addr, clear, set) clrsetbits(be16, addr, clear, set)

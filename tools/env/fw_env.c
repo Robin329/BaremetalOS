@@ -30,11 +30,11 @@
 #include <dirent.h>
 
 #ifdef MTD_OLD
-# include <stdint.h>
-# include <linux/mtd/mtd.h>
+#include <stdint.h>
+#include <linux/mtd/mtd.h>
 #else
-# define  __user	/* nothing */
-# include <mtd/mtd-user.h>
+#define __user /* nothing */
+#include <mtd/mtd-user.h>
 #endif
 
 #include <mtd/ubi-user.h>
@@ -48,28 +48,31 @@ struct env_opts default_opts = {
 #endif
 };
 
-#define DIV_ROUND_UP(n, d)	(((n) + (d) - 1) / (d))
+#define DIV_ROUND_UP(n, d) (((n) + (d)-1) / (d))
 
-#define min(x, y) ({				\
-	typeof(x) _min1 = (x);			\
-	typeof(y) _min2 = (y);			\
-	(void) (&_min1 == &_min2);		\
-	_min1 < _min2 ? _min1 : _min2; })
+#define min(x, y)                                                              \
+	({                                                                     \
+		typeof(x) _min1 = (x);                                         \
+		typeof(y) _min2 = (y);                                         \
+		(void)(&_min1 == &_min2);                                      \
+		_min1 < _min2 ? _min1 : _min2;                                 \
+	})
 
 struct envdev_s {
-	const char *devname;		/* Device name */
-	long long devoff;		/* Device offset */
-	ulong env_size;			/* environment size */
-	ulong erase_size;		/* device erase size */
-	ulong env_sectors;		/* number of environment sectors */
-	uint8_t mtd_type;		/* type of the MTD device */
-	int is_ubi;			/* set if we use UBI volume */
+	const char *devname; /* Device name */
+	long long devoff; /* Device offset */
+	ulong env_size; /* environment size */
+	ulong erase_size; /* device erase size */
+	ulong env_sectors; /* number of environment sectors */
+	uint8_t mtd_type; /* type of the MTD device */
+	int is_ubi; /* set if we use UBI volume */
 };
 
 static struct envdev_s envdevices[2] = {
 	{
 		.mtd_type = MTD_ABSENT,
-	}, {
+	},
+	{
 		.mtd_type = MTD_ABSENT,
 	},
 };
@@ -87,16 +90,16 @@ static int dev_current;
 #define CUR_ENVSIZE ENVSIZE(dev_current)
 
 static unsigned long usable_envsize;
-#define ENV_SIZE      usable_envsize
+#define ENV_SIZE usable_envsize
 
 struct env_image_single {
-	uint32_t crc;		/* CRC32 over data bytes    */
+	uint32_t crc; /* CRC32 over data bytes    */
 	char data[];
 };
 
 struct env_image_redundant {
-	uint32_t crc;		/* CRC32 over data bytes    */
-	unsigned char flags;	/* active or obsolete */
+	uint32_t crc; /* CRC32 over data bytes    */
+	unsigned char flags; /* active or obsolete */
 	char data[];
 };
 
@@ -124,8 +127,8 @@ static int have_redund_env;
 #define DEFAULT_ENV_INSTANCE_STATIC
 #include <env_default.h>
 
-#define UBI_DEV_START "/dev/ubi"
-#define UBI_SYSFS "/sys/class/ubi"
+#define UBI_DEV_START	  "/dev/ubi"
+#define UBI_SYSFS	  "/sys/class/ubi"
 #define UBI_VOL_NAME_PATT "ubi%d_%d"
 
 static int is_ubi_devname(const char *devname)
@@ -152,9 +155,8 @@ static int ubi_check_volume_sysfs_name(const char *volume_sysfs_name,
 	ret = fscanf(file, "%ms", &name);
 	fclose(file);
 	if (ret <= 0 || !name) {
-		fprintf(stderr,
-			"Failed to read from file %s, ret = %d, name = %s\n",
-			path, ret, name);
+		blog_info("Failed to read from file %s, ret = %d, name = %s\n",
+			  path, ret, name);
 		return -1;
 	}
 
@@ -180,7 +182,7 @@ static int ubi_get_volnum_by_name(int devnum, const char *volname)
 		return -1;
 
 #ifdef DEBUG
-	fprintf(stderr, "Looking for volume name \"%s\"\n", volname);
+	blog_info("Looking for volume name \"%s\"\n", volname);
 #endif
 
 	while (1) {
@@ -188,8 +190,8 @@ static int ubi_get_volnum_by_name(int devnum, const char *volname)
 		if (!dirent)
 			return -1;
 
-		ret = sscanf(dirent->d_name, UBI_VOL_NAME_PATT,
-			     &tmp_devnum, &volnum);
+		ret = sscanf(dirent->d_name, UBI_VOL_NAME_PATT, &tmp_devnum,
+			     &volnum);
 		if (ret == 2 && devnum == tmp_devnum) {
 			if (ubi_check_volume_sysfs_name(dirent->d_name,
 							volname) == 0) {
@@ -236,8 +238,8 @@ static const char *ubi_get_volume_devname(const char *devname,
 		return NULL;
 
 #ifdef DEBUG
-	fprintf(stderr, "Found ubi volume \"%s:%s\" -> %s\n",
-		devname, volname, volume_devname);
+	blog_info("Found ubi volume \"%s:%s\" -> %s\n", devname, volname,
+		  volume_devname);
 #endif
 
 	return volume_devname;
@@ -267,8 +269,7 @@ static void ubi_check_dev(unsigned int dev_id)
 		/* Let's find real volume device name */
 		volume_devname = ubi_get_volume_devname(devname, volname);
 		if (!volume_devname) {
-			fprintf(stderr, "Didn't found ubi volume \"%s\"\n",
-				volname);
+			blog_info("Didn't found ubi volume \"%s\"\n", volname);
 			return;
 		}
 
@@ -305,7 +306,7 @@ static int ubi_read(int fd, void *buf, size_t count)
 			 *
 			 * Leave catching this error to CRC check.
 			 */
-			fprintf(stderr, "Warning: end of data on ubi volume\n");
+			blog_info("Warning: end of data on ubi volume\n");
 			return 0;
 		} else if (errno == EBADF) {
 			/*
@@ -313,14 +314,14 @@ static int ubi_read(int fd, void *buf, size_t count)
 			 * above, we cannot return error now, as we will still
 			 * be able to successfully write environment later.
 			 */
-			fprintf(stderr, "Warning: corrupted volume?\n");
+			blog_info("Warning: corrupted volume?\n");
 			return 0;
 		} else if (errno == EINTR) {
 			continue;
 		}
 
-		fprintf(stderr, "Cannot read %u bytes from ubi volume, %s\n",
-			(unsigned int)count, strerror(errno));
+		blog_info("Cannot read %u bytes from ubi volume, %s\n",
+			  (unsigned int)count, strerror(errno));
 		return -1;
 	}
 
@@ -337,8 +338,8 @@ static int ubi_write(int fd, const void *buf, size_t count)
 			if (ret < 0 && errno == EINTR)
 				continue;
 
-			fprintf(stderr, "Cannot write %u bytes to ubi volume\n",
-				(unsigned int)count);
+			blog_info("Cannot write %u bytes to ubi volume\n",
+				  (unsigned int)count);
 			return -1;
 		}
 
@@ -405,8 +406,8 @@ char *fw_getenv(char *name)
 
 		for (nxt = env; *nxt; ++nxt) {
 			if (nxt >= &environment.data[ENV_SIZE]) {
-				fprintf(stderr, "## Error: "
-					"environment not terminated\n");
+				blog_info("## Error: "
+					  "environment not terminated\n");
 				return NULL;
 			}
 		}
@@ -431,7 +432,8 @@ char *fw_getdefenv(char *name)
 
 		for (nxt = env; *nxt; ++nxt) {
 			if (nxt >= &default_environment[ENV_SIZE]) {
-				fprintf(stderr, "## Error: "
+				blog_info(
+					"## Error: "
 					"default environment not terminated\n");
 				return NULL;
 			}
@@ -453,7 +455,7 @@ int fw_printenv(int argc, char *argv[], int value_only, struct env_opts *opts)
 	int i, rc = 0;
 
 	if (value_only && argc != 1) {
-		fprintf(stderr,
+		blog_info(
 			"## Error: `-n'/`--noheader' option requires exactly one argument\n");
 		return -1;
 	}
@@ -464,12 +466,13 @@ int fw_printenv(int argc, char *argv[], int value_only, struct env_opts *opts)
 	if (fw_env_open(opts))
 		return -1;
 
-	if (argc == 0) {	/* Print all env variables  */
+	if (argc == 0) { /* Print all env variables  */
 		char *env, *nxt;
 		for (env = environment.data; *env; env = nxt + 1) {
 			for (nxt = env; *nxt; ++nxt) {
 				if (nxt >= &environment.data[ENV_SIZE]) {
-					fprintf(stderr, "## Error: "
+					blog_info(
+						"## Error: "
 						"environment not terminated\n");
 					return -1;
 				}
@@ -481,13 +484,13 @@ int fw_printenv(int argc, char *argv[], int value_only, struct env_opts *opts)
 		return 0;
 	}
 
-	for (i = 0; i < argc; ++i) {	/* print a subset of env variables */
+	for (i = 0; i < argc; ++i) { /* print a subset of env variables */
 		char *name = argv[i];
 		char *val = NULL;
 
 		val = fw_getenv(name);
 		if (!val) {
-			fprintf(stderr, "## Error: \"%s\" not defined\n", name);
+			blog_info("## Error: \"%s\" not defined\n", name);
 			rc = -1;
 			continue;
 		}
@@ -516,11 +519,11 @@ int fw_env_flush(struct env_opts *opts)
 	/*
 	 * Update CRC
 	 */
-	*environment.crc = crc32(0, (uint8_t *) environment.data, ENV_SIZE);
+	*environment.crc = crc32(0, (uint8_t *)environment.data, ENV_SIZE);
 
 	/* write environment back to flash */
 	if (flash_io(O_RDWR, environment.image, CUR_ENVSIZE)) {
-		fprintf(stderr, "Error: can't write fw_env to flash\n");
+		blog_info("Error: can't write fw_env to flash\n");
 		return -1;
 	}
 
@@ -545,8 +548,8 @@ int fw_env_write(char *name, char *value)
 	for (nxt = env = environment.data; *env; env = nxt + 1) {
 		for (nxt = env; *nxt; ++nxt) {
 			if (nxt >= &environment.data[ENV_SIZE]) {
-				fprintf(stderr, "## Error: "
-					"environment not terminated\n");
+				blog_info("## Error: "
+					  "environment not terminated\n");
 				errno = EINVAL;
 				return -1;
 			}
@@ -558,39 +561,39 @@ int fw_env_write(char *name, char *value)
 
 	deleting = (oldval && !(value && strlen(value)));
 	creating = (!oldval && (value && strlen(value)));
-	overwriting = (oldval && (value && strlen(value) &&
-				  strcmp(oldval, value)));
+	overwriting =
+		(oldval && (value && strlen(value) && strcmp(oldval, value)));
 
 	/* check for permission */
 	if (deleting) {
-		if (env_flags_validate_varaccess(name,
-		    ENV_FLAGS_VARACCESS_PREVENT_DELETE)) {
+		if (env_flags_validate_varaccess(
+			    name, ENV_FLAGS_VARACCESS_PREVENT_DELETE)) {
 			printf("Can't delete \"%s\"\n", name);
 			errno = EROFS;
 			return -1;
 		}
 	} else if (overwriting) {
-		if (env_flags_validate_varaccess(name,
-		    ENV_FLAGS_VARACCESS_PREVENT_OVERWR)) {
+		if (env_flags_validate_varaccess(
+			    name, ENV_FLAGS_VARACCESS_PREVENT_OVERWR)) {
 			printf("Can't overwrite \"%s\"\n", name);
 			errno = EROFS;
 			return -1;
-		} else if (env_flags_validate_varaccess(name,
-			   ENV_FLAGS_VARACCESS_PREVENT_NONDEF_OVERWR)) {
+		} else if (env_flags_validate_varaccess(
+				   name,
+				   ENV_FLAGS_VARACCESS_PREVENT_NONDEF_OVERWR)) {
 			const char *defval = fw_getdefenv(name);
 
 			if (defval == NULL)
 				defval = "";
-			if (strcmp(oldval, defval)
-			    != 0) {
+			if (strcmp(oldval, defval) != 0) {
 				printf("Can't overwrite \"%s\"\n", name);
 				errno = EROFS;
 				return -1;
 			}
 		}
 	} else if (creating) {
-		if (env_flags_validate_varaccess(name,
-		    ENV_FLAGS_VARACCESS_PREVENT_CREATE)) {
+		if (env_flags_validate_varaccess(
+			    name, ENV_FLAGS_VARACCESS_PREVENT_CREATE)) {
 			printf("Can't create \"%s\"\n", name);
 			errno = EROFS;
 			return -1;
@@ -634,8 +637,8 @@ int fw_env_write(char *name, char *value)
 	len += strlen(value) + 1;
 
 	if (len > (&environment.data[ENV_SIZE] - env)) {
-		fprintf(stderr,
-			"Error: environment overflow, \"%s\" deleted\n", name);
+		blog_info("Error: environment overflow, \"%s\" deleted\n",
+			  name);
 		return -1;
 	}
 
@@ -673,13 +676,13 @@ int fw_env_set(int argc, char *argv[], struct env_opts *opts)
 		opts = &default_opts;
 
 	if (argc < 1) {
-		fprintf(stderr, "## Error: variable name missing\n");
+		blog_info("## Error: variable name missing\n");
 		errno = EINVAL;
 		return -1;
 	}
 
 	if (fw_env_open(opts)) {
-		fprintf(stderr, "Error: environment not initialized\n");
+		blog_info("Error: environment not initialized\n");
 		return -1;
 	}
 
@@ -702,9 +705,8 @@ int fw_env_set(int argc, char *argv[], struct env_opts *opts)
 		oldval = value;
 		value = realloc(value, len + val_len + 1);
 		if (!value) {
-			fprintf(stderr,
-				"Cannot malloc %zu bytes: %s\n",
-				len, strerror(errno));
+			blog_info("Cannot malloc %zu bytes: %s\n", len,
+				  strerror(errno));
 			free(oldval);
 			return -1;
 		}
@@ -756,7 +758,7 @@ int fw_parse_script(char *fname, struct env_opts *opts)
 		opts = &default_opts;
 
 	if (fw_env_open(opts)) {
-		fprintf(stderr, "Error: environment not initialized\n");
+		blog_info("Error: environment not initialized\n");
 		return -1;
 	}
 
@@ -765,8 +767,7 @@ int fw_parse_script(char *fname, struct env_opts *opts)
 	else {
 		fp = fopen(fname, "r");
 		if (fp == NULL) {
-			fprintf(stderr, "I cannot open %s for reading\n",
-				fname);
+			blog_info("I cannot open %s for reading\n", fname);
 			return -1;
 		}
 	}
@@ -779,9 +780,7 @@ int fw_parse_script(char *fname, struct env_opts *opts)
 		 * terminated, reports an error and exit.
 		 */
 		if (line[len - 1] != '\n') {
-			fprintf(stderr,
-				"Line %d not correctly terminated\n",
-				lineno);
+			blog_info("Line %d not correctly terminated\n", lineno);
 			ret = -1;
 			break;
 		}
@@ -813,8 +812,7 @@ int fw_parse_script(char *fname, struct env_opts *opts)
 				val = NULL;
 		}
 #ifdef DEBUG
-		fprintf(stderr, "Setting %s : %s\n",
-			name, val ? val : " removed");
+		blog_info("Setting %s : %s\n", name, val ? val : " removed");
 #endif
 
 		if (env_flags_validate_type(name, val) < 0) {
@@ -827,13 +825,11 @@ int fw_parse_script(char *fname, struct env_opts *opts)
 		 * try to save the environment and returns an error
 		 */
 		if (fw_env_write(name, val)) {
-			fprintf(stderr,
-				"fw_env_write returns with error : %s\n",
-				strerror(errno));
+			blog_info("fw_env_write returns with error : %s\n",
+				  strerror(errno));
 			ret = -1;
 			break;
 		}
-
 	}
 	free(line);
 
@@ -878,8 +874,8 @@ static int flash_bad_block(int fd, uint8_t mtd_type, loff_t blockstart)
 
 		if (badblock) {
 #ifdef DEBUG
-			fprintf(stderr, "Bad block at 0x%llx, skipping\n",
-				(unsigned long long)blockstart);
+			blog_info("Bad block at 0x%llx, skipping\n",
+				  (unsigned long long)blockstart);
 #endif
 			return badblock;
 		}
@@ -896,13 +892,13 @@ static int flash_bad_block(int fd, uint8_t mtd_type, loff_t blockstart)
 static int flash_read_buf(int dev, int fd, void *buf, size_t count,
 			  off_t offset)
 {
-	size_t blocklen;	/* erase / write length - one block on NAND,
+	size_t blocklen; /* erase / write length - one block on NAND,
 				   0 on NOR */
-	size_t processed = 0;	/* progress counter */
-	size_t readlen = count;	/* current read length */
-	off_t block_seek;	/* offset inside the current block to the start
+	size_t processed = 0; /* progress counter */
+	size_t readlen = count; /* current read length */
+	off_t block_seek; /* offset inside the current block to the start
 				   of the data */
-	loff_t blockstart;	/* running start of the current block -
+	loff_t blockstart; /* running start of the current block -
 				   MEMGETBADBLOCK needs 64 bits */
 	int rc;
 
@@ -928,16 +924,16 @@ static int flash_read_buf(int dev, int fd, void *buf, size_t count,
 	/* This only runs once on NOR flash */
 	while (processed < count) {
 		rc = flash_bad_block(fd, DEVTYPE(dev), blockstart);
-		if (rc < 0)	/* block test failed */
+		if (rc < 0) /* block test failed */
 			return -1;
 
 		if (blockstart + block_seek + readlen > environment_end(dev)) {
 			/* End of range is reached */
-			fprintf(stderr, "Too few good blocks within range\n");
+			blog_info("Too few good blocks within range\n");
 			return -1;
 		}
 
-		if (rc) {	/* block is bad */
+		if (rc) { /* block is bad */
 			blockstart += blocklen;
 			continue;
 		}
@@ -950,18 +946,18 @@ static int flash_read_buf(int dev, int fd, void *buf, size_t count,
 
 		rc = read(fd, buf + processed, readlen);
 		if (rc == -1) {
-			fprintf(stderr, "Read error on %s: %s\n",
-				DEVNAME(dev), strerror(errno));
+			blog_info("Read error on %s: %s\n", DEVNAME(dev),
+				  strerror(errno));
 			return -1;
 		}
 #ifdef DEBUG
-		fprintf(stderr, "Read 0x%x bytes at 0x%llx on %s\n",
-			rc, (unsigned long long)blockstart + block_seek,
-			DEVNAME(dev));
+		blog_info("Read 0x%x bytes at 0x%llx on %s\n", rc,
+			  (unsigned long long)blockstart + block_seek,
+			  DEVNAME(dev));
 #endif
 		processed += rc;
 		if (rc != readlen) {
-			fprintf(stderr,
+			blog_info(
 				"Warning on %s: Attempted to read %zd bytes but got %d\n",
 				DEVNAME(dev), readlen, rc);
 			readlen -= rc;
@@ -986,21 +982,21 @@ static int flash_write_buf(int dev, int fd, void *buf, size_t count)
 {
 	void *data;
 	struct erase_info_user erase;
-	size_t blocklen;	/* length of NAND block / NOR erase sector */
-	size_t erase_len;	/* whole area that can be erased - may include
+	size_t blocklen; /* length of NAND block / NOR erase sector */
+	size_t erase_len; /* whole area that can be erased - may include
 				   bad blocks */
-	size_t erasesize;	/* erase / write length - one block on NAND,
+	size_t erasesize; /* erase / write length - one block on NAND,
 				   whole area on NOR */
-	size_t processed = 0;	/* progress counter */
-	size_t write_total;	/* total size to actually write - excluding
+	size_t processed = 0; /* progress counter */
+	size_t write_total; /* total size to actually write - excluding
 				   bad blocks */
-	off_t erase_offset;	/* offset to the first erase block (aligned)
+	off_t erase_offset; /* offset to the first erase block (aligned)
 				   below offset */
-	off_t block_seek;	/* offset inside the erase block to the start
+	off_t block_seek; /* offset inside the erase block to the start
 				   of the data */
-	loff_t blockstart;	/* running start of the current block -
+	loff_t blockstart; /* running start of the current block -
 				   MEMGETBADBLOCK needs 64 bits */
-	int was_locked = 0;	/* flash lock flag */
+	int was_locked = 0; /* flash lock flag */
 	int rc;
 
 	/*
@@ -1030,8 +1026,8 @@ static int flash_write_buf(int dev, int fd, void *buf, size_t count)
 		 * to the start of the data, then count bytes of data, and
 		 * to the end of the block
 		 */
-		write_total = ((block_seek + count + blocklen - 1) /
-			       blocklen) * blocklen;
+		write_total = ((block_seek + count + blocklen - 1) / blocklen) *
+			      blocklen;
 	}
 
 	/*
@@ -1042,9 +1038,8 @@ static int flash_write_buf(int dev, int fd, void *buf, size_t count)
 	if (write_total > count) {
 		data = malloc(erase_len);
 		if (!data) {
-			fprintf(stderr,
-				"Cannot malloc %zu bytes: %s\n",
-				erase_len, strerror(errno));
+			blog_info("Cannot malloc %zu bytes: %s\n", erase_len,
+				  strerror(errno));
 			return -1;
 		}
 
@@ -1053,17 +1048,17 @@ static int flash_write_buf(int dev, int fd, void *buf, size_t count)
 			return -1;
 
 #ifdef DEBUG
-		fprintf(stderr, "Preserving data ");
+		blog_info("Preserving data ");
 		if (block_seek != 0)
-			fprintf(stderr, "0x%x - 0x%lx", 0, block_seek - 1);
+			blog_info("0x%x - 0x%lx", 0, block_seek - 1);
 		if (block_seek + count != write_total) {
 			if (block_seek != 0)
-				fprintf(stderr, " and ");
-			fprintf(stderr, "0x%lx - 0x%lx",
-				(unsigned long)block_seek + count,
-				(unsigned long)write_total - 1);
+				blog_info(" and ");
+			blog_info("0x%lx - 0x%lx",
+				  (unsigned long)block_seek + count,
+				  (unsigned long)write_total - 1);
 		}
-		fprintf(stderr, "\n");
+		blog_info("\n");
 #endif
 		/* Overwrite the old environment */
 		memcpy(data + block_seek, buf, count);
@@ -1090,15 +1085,15 @@ static int flash_write_buf(int dev, int fd, void *buf, size_t count)
 	/* This only runs once on NOR flash and SPI-dataflash */
 	while (processed < write_total) {
 		rc = flash_bad_block(fd, DEVTYPE(dev), blockstart);
-		if (rc < 0)	/* block test failed */
+		if (rc < 0) /* block test failed */
 			return rc;
 
 		if (blockstart + erasesize > environment_end(dev)) {
-			fprintf(stderr, "End of range reached, aborting\n");
+			blog_info("End of range reached, aborting\n");
 			return -1;
 		}
 
-		if (rc) {	/* block is bad */
+		if (rc) { /* block is bad */
 			blockstart += blocklen;
 			continue;
 		}
@@ -1108,33 +1103,32 @@ static int flash_write_buf(int dev, int fd, void *buf, size_t count)
 			was_locked = ioctl(fd, MEMISLOCKED, &erase);
 			/* treat any errors as unlocked flash */
 			if (was_locked < 0)
-					was_locked = 0;
+				was_locked = 0;
 			if (was_locked)
 				ioctl(fd, MEMUNLOCK, &erase);
 			/* These do not need an explicit erase cycle */
 			if (DEVTYPE(dev) != MTD_DATAFLASH)
 				if (ioctl(fd, MEMERASE, &erase) != 0) {
-					fprintf(stderr,
-						"MTD erase error on %s: %s\n",
-						DEVNAME(dev), strerror(errno));
+					blog_info("MTD erase error on %s: %s\n",
+						  DEVNAME(dev),
+						  strerror(errno));
 					return -1;
 				}
 		}
 
 		if (lseek(fd, blockstart, SEEK_SET) == -1) {
-			fprintf(stderr,
-				"Seek error on %s: %s\n",
-				DEVNAME(dev), strerror(errno));
+			blog_info("Seek error on %s: %s\n", DEVNAME(dev),
+				  strerror(errno));
 			return -1;
 		}
 #ifdef DEBUG
-		fprintf(stderr, "Write 0x%llx bytes at 0x%llx\n",
-			(unsigned long long)erasesize,
-			(unsigned long long)blockstart);
+		blog_info("Write 0x%llx bytes at 0x%llx\n",
+			  (unsigned long long)erasesize,
+			  (unsigned long long)blockstart);
 #endif
 		if (write(fd, data + processed, erasesize) != erasesize) {
-			fprintf(stderr, "Write error on %s: %s\n",
-				DEVNAME(dev), strerror(errno));
+			blog_info("Write error on %s: %s\n", DEVNAME(dev),
+				  strerror(errno));
 			return -1;
 		}
 
@@ -1162,15 +1156,14 @@ static int flash_flag_obsolete(int dev, int fd, off_t offset)
 	int rc;
 	struct erase_info_user erase;
 	char tmp = ENV_REDUND_OBSOLETE;
-	int was_locked;	/* flash lock flag */
+	int was_locked; /* flash lock flag */
 
 	erase.start = DEVOFFSET(dev);
 	erase.length = DEVESIZE(dev);
 	/* This relies on the fact, that ENV_REDUND_OBSOLETE == 0 */
 	rc = lseek(fd, offset, SEEK_SET);
 	if (rc < 0) {
-		fprintf(stderr, "Cannot seek to set the flag on %s\n",
-			DEVNAME(dev));
+		blog_info("Cannot seek to set the flag on %s\n", DEVNAME(dev));
 		return rc;
 	}
 	was_locked = ioctl(fd, MEMISLOCKED, &erase);
@@ -1203,14 +1196,14 @@ static int flash_write(int fd_current, int fd_target, int dev_target, void *buf,
 		*environment.flags = ENV_REDUND_ACTIVE;
 		break;
 	default:
-		fprintf(stderr, "Unimplemented flash scheme %u\n",
-			environment.flag_scheme);
+		blog_info("Unimplemented flash scheme %u\n",
+			  environment.flag_scheme);
 		return -1;
 	}
 
 #ifdef DEBUG
-	fprintf(stderr, "Writing new environment at 0x%llx on %s\n",
-		DEVOFFSET(dev_target), DEVNAME(dev_target));
+	blog_info("Writing new environment at 0x%llx on %s\n",
+		  DEVOFFSET(dev_target), DEVNAME(dev_target));
 #endif
 
 	if (IS_UBI(dev_target)) {
@@ -1226,9 +1219,9 @@ static int flash_write(int fd_current, int fd_target, int dev_target, void *buf,
 	if (environment.flag_scheme == FLAG_BOOLEAN) {
 		/* Have to set obsolete flag */
 		off_t offset = DEVOFFSET(dev_current) +
-		    offsetof(struct env_image_redundant, flags);
+			       offsetof(struct env_image_redundant, flags);
 #ifdef DEBUG
-		fprintf(stderr,
+		blog_info(
 			"Setting obsolete flag in environment at 0x%llx on %s\n",
 			DEVOFFSET(dev_current), DEVNAME(dev_current));
 #endif
@@ -1276,8 +1269,7 @@ static int flash_open_tempfile(const char **dname, const char **target_temp)
 	rc = mkstemp(temp_name);
 	if (rc == -1) {
 		/* fall back to in place write */
-		fprintf(stderr,
-			"Can't create %s: %s\n", temp_name, strerror(errno));
+		blog_info("Can't create %s: %s\n", temp_name, strerror(errno));
 		free(temp_name);
 	} else {
 		*target_temp = temp_name;
@@ -1305,9 +1297,8 @@ static int flash_io_write(int fd_current, void *buf, size_t count)
 		/* dev_target: fd_target, erase_target */
 		fd_target = open(DEVNAME(dev_target), O_RDWR);
 		if (fd_target < 0) {
-			fprintf(stderr,
-				"Can't open %s: %s\n",
-				DEVNAME(dev_target), strerror(errno));
+			blog_info("Can't open %s: %s\n", DEVNAME(dev_target),
+				  strerror(errno));
 			rc = -1;
 			goto exit;
 		}
@@ -1328,23 +1319,19 @@ static int flash_io_write(int fd_current, void *buf, size_t count)
 	rc = flash_write(fd_current, fd_target, dev_target, buf, count);
 
 	if (fsync(fd_current) && !(errno == EINVAL || errno == EROFS)) {
-		fprintf(stderr,
-			"fsync failed on %s: %s\n",
-			DEVNAME(dev_current), strerror(errno));
+		blog_info("fsync failed on %s: %s\n", DEVNAME(dev_current),
+			  strerror(errno));
 	}
 
 	if (fd_current != fd_target) {
-		if (fsync(fd_target) &&
-		    !(errno == EINVAL || errno == EROFS)) {
-			fprintf(stderr,
-				"fsync failed on %s: %s\n",
-				DEVNAME(dev_current), strerror(errno));
+		if (fsync(fd_target) && !(errno == EINVAL || errno == EROFS)) {
+			blog_info("fsync failed on %s: %s\n",
+				  DEVNAME(dev_current), strerror(errno));
 		}
 
 		if (close(fd_target)) {
-			fprintf(stderr,
-				"I/O error on %s: %s\n",
-				DEVNAME(dev_target), strerror(errno));
+			blog_info("I/O error on %s: %s\n", DEVNAME(dev_target),
+				  strerror(errno));
 			rc = -1;
 		}
 
@@ -1353,30 +1340,26 @@ static int flash_io_write(int fd_current, void *buf, size_t count)
 
 			dir_fd = open(dname, O_DIRECTORY | O_RDONLY);
 			if (dir_fd == -1)
-				fprintf(stderr,
-					"Can't open %s: %s\n",
-					dname, strerror(errno));
+				blog_info("Can't open %s: %s\n", dname,
+					  strerror(errno));
 
 			if (rename(target_temp, DEVNAME(dev_target))) {
-				fprintf(stderr,
-					"rename failed %s => %s: %s\n",
-					target_temp, DEVNAME(dev_target),
-					strerror(errno));
+				blog_info("rename failed %s => %s: %s\n",
+					  target_temp, DEVNAME(dev_target),
+					  strerror(errno));
 				rc = -1;
 			}
 
 			if (dir_fd != -1 && fsync(dir_fd))
-				fprintf(stderr,
-					"fsync failed on %s: %s\n",
-					dname, strerror(errno));
+				blog_info("fsync failed on %s: %s\n", dname,
+					  strerror(errno));
 
 			if (dir_fd != -1 && close(dir_fd))
-				fprintf(stderr,
-					"I/O error on %s: %s\n",
-					dname, strerror(errno));
+				blog_info("I/O error on %s: %s\n", dname,
+					  strerror(errno));
 		}
 	}
- exit:
+exit:
 	return rc;
 }
 
@@ -1387,9 +1370,8 @@ static int flash_io(int mode, void *buf, size_t count)
 	/* dev_current: fd_current, erase_current */
 	fd_current = open(DEVNAME(dev_current), mode);
 	if (fd_current < 0) {
-		fprintf(stderr,
-			"Can't open %s: %s\n",
-			DEVNAME(dev_current), strerror(errno));
+		blog_info("Can't open %s: %s\n", DEVNAME(dev_current),
+			  strerror(errno));
 		return -1;
 	}
 
@@ -1400,9 +1382,8 @@ static int flash_io(int mode, void *buf, size_t count)
 	}
 
 	if (close(fd_current)) {
-		fprintf(stderr,
-			"I/O error on %s: %s\n",
-			DEVNAME(dev_current), strerror(errno));
+		blog_info("I/O error on %s: %s\n", DEVNAME(dev_current),
+			  strerror(errno));
 		return -1;
 	}
 
@@ -1427,14 +1408,13 @@ int fw_env_open(struct env_opts *opts)
 	if (!opts)
 		opts = &default_opts;
 
-	if (parse_config(opts))	/* should fill envdevices */
+	if (parse_config(opts)) /* should fill envdevices */
 		return -EINVAL;
 
 	addr0 = calloc(1, CUR_ENVSIZE);
 	if (addr0 == NULL) {
-		fprintf(stderr,
-			"Not enough memory for environment (%ld bytes)\n",
-			CUR_ENVSIZE);
+		blog_info("Not enough memory for environment (%ld bytes)\n",
+			  CUR_ENVSIZE);
 		ret = -ENOMEM;
 		goto open_cleanup;
 	}
@@ -1451,7 +1431,7 @@ int fw_env_open(struct env_opts *opts)
 		crc0 = crc32(0, (uint8_t *)single->data, ENV_SIZE);
 		crc0_ok = (crc0 == single->crc);
 		if (!crc0_ok) {
-			fprintf(stderr,
+			blog_info(
 				"Warning: Bad CRC, using default environment\n");
 			memcpy(single->data, default_environment,
 			       sizeof(default_environment));
@@ -1474,7 +1454,7 @@ int fw_env_open(struct env_opts *opts)
 		dev_current = 1;
 		addr1 = calloc(1, CUR_ENVSIZE);
 		if (addr1 == NULL) {
-			fprintf(stderr,
+			blog_info(
 				"Not enough memory for environment (%ld bytes)\n",
 				CUR_ENVSIZE);
 			ret = -ENOMEM;
@@ -1505,7 +1485,7 @@ int fw_env_open(struct env_opts *opts)
 			   IS_UBI(dev_current) == IS_UBI(!dev_current)) {
 			environment.flag_scheme = FLAG_INCREMENTAL;
 		} else {
-			fprintf(stderr, "Incompatible flash types!\n");
+			blog_info("Incompatible flash types!\n");
 			ret = -EINVAL;
 			goto open_cleanup;
 		}
@@ -1524,7 +1504,7 @@ int fw_env_open(struct env_opts *opts)
 		} else if (!crc0_ok && crc1_ok) {
 			dev_current = 1;
 		} else if (!crc0_ok && !crc1_ok) {
-			fprintf(stderr,
+			blog_info(
 				"Warning: Bad CRC, using default environment\n");
 			memcpy(redundant0->data, default_environment,
 			       sizeof(default_environment));
@@ -1555,12 +1535,12 @@ int fw_env_open(struct env_opts *opts)
 				else if ((flag1 == 255 && flag0 == 0) ||
 					 flag0 >= flag1)
 					dev_current = 0;
-				else	/* flag1 > flag0 */
+				else /* flag1 > flag0 */
 					dev_current = 1;
 				break;
 			default:
-				fprintf(stderr, "Unknown flag scheme %u\n",
-					environment.flag_scheme);
+				blog_info("Unknown flag scheme %u\n",
+					  environment.flag_scheme);
 				return -1;
 			}
 		}
@@ -1584,12 +1564,12 @@ int fw_env_open(struct env_opts *opts)
 			free(addr1);
 		}
 #ifdef DEBUG
-		fprintf(stderr, "Selected env in %s\n", DEVNAME(dev_current));
+		blog_info("Selected env in %s\n", DEVNAME(dev_current));
 #endif
 	}
 	return 0;
 
- open_cleanup:
+open_cleanup:
 	if (addr0)
 		free(addr0);
 
@@ -1623,38 +1603,38 @@ static int check_device_config(int dev)
 
 	fd = open(DEVNAME(dev), O_RDONLY);
 	if (fd < 0) {
-		fprintf(stderr,
-			"Cannot open %s: %s\n", DEVNAME(dev), strerror(errno));
+		blog_info("Cannot open %s: %s\n", DEVNAME(dev),
+			  strerror(errno));
 		return -1;
 	}
 
 	rc = fstat(fd, &st);
 	if (rc < 0) {
-		fprintf(stderr, "Cannot stat the file %s\n", DEVNAME(dev));
+		blog_info("Cannot stat the file %s\n", DEVNAME(dev));
 		goto err;
 	}
 
 	if (IS_UBI(dev)) {
 		rc = ioctl(fd, UBI_IOCEBISMAP, &lnum);
 		if (rc < 0) {
-			fprintf(stderr, "Cannot get UBI information for %s\n",
-				DEVNAME(dev));
+			blog_info("Cannot get UBI information for %s\n",
+				  DEVNAME(dev));
 			goto err;
 		}
 	} else if (S_ISCHR(st.st_mode)) {
 		struct mtd_info_user mtdinfo;
 		rc = ioctl(fd, MEMGETINFO, &mtdinfo);
 		if (rc < 0) {
-			fprintf(stderr, "Cannot get MTD information for %s\n",
-				DEVNAME(dev));
+			blog_info("Cannot get MTD information for %s\n",
+				  DEVNAME(dev));
 			goto err;
 		}
 		if (mtdinfo.type != MTD_NORFLASH &&
 		    mtdinfo.type != MTD_NANDFLASH &&
 		    mtdinfo.type != MTD_DATAFLASH &&
 		    mtdinfo.type != MTD_UBIVOLUME) {
-			fprintf(stderr, "Unsupported flash type %u on %s\n",
-				mtdinfo.type, DEVNAME(dev));
+			blog_info("Unsupported flash type %u on %s\n",
+				  mtdinfo.type, DEVNAME(dev));
 			goto err;
 		}
 		DEVTYPE(dev) = mtdinfo.type;
@@ -1678,7 +1658,7 @@ static int check_device_config(int dev)
 		if (DEVOFFSET(dev) < 0) {
 			rc = ioctl(fd, BLKGETSIZE64, &size);
 			if (rc < 0) {
-				fprintf(stderr,
+				blog_info(
 					"Could not get block device size on %s\n",
 					DEVNAME(dev));
 				goto err;
@@ -1686,9 +1666,8 @@ static int check_device_config(int dev)
 
 			DEVOFFSET(dev) = DEVOFFSET(dev) + size;
 #ifdef DEBUG
-			fprintf(stderr,
-				"Calculated device offset 0x%llx on %s\n",
-				DEVOFFSET(dev), DEVNAME(dev));
+			blog_info("Calculated device offset 0x%llx on %s\n",
+				  DEVOFFSET(dev), DEVNAME(dev));
 #endif
 		}
 	}
@@ -1698,20 +1677,19 @@ static int check_device_config(int dev)
 		ENVSECTORS(dev) = DIV_ROUND_UP(ENVSIZE(dev), DEVESIZE(dev));
 
 	if (DEVOFFSET(dev) % DEVESIZE(dev) != 0) {
-		fprintf(stderr,
+		blog_info(
 			"Environment does not start on (erase) block boundary\n");
 		errno = EINVAL;
 		return -1;
 	}
 
 	if (ENVSIZE(dev) > ENVSECTORS(dev) * DEVESIZE(dev)) {
-		fprintf(stderr,
-			"Environment does not fit into available sectors\n");
+		blog_info("Environment does not fit into available sectors\n");
 		errno = EINVAL;
 		return -1;
 	}
 
- err:
+err:
 	close(fd);
 	return rc;
 }
@@ -1739,7 +1717,8 @@ static int find_nvmem_device(void)
 			continue;
 		}
 
-		bytes = snprintf(comp, sizeof(comp), "%s/%s/of_node/compatible", path, dent->d_name);
+		bytes = snprintf(comp, sizeof(comp), "%s/%s/of_node/compatible",
+				 path, dent->d_name);
 		if (bytes < 0 || bytes == sizeof(comp)) {
 			continue;
 		}
@@ -1751,15 +1730,14 @@ static int find_nvmem_device(void)
 
 		size = fread(buf, sizeof(buf), 1, fp);
 		if (size != 1) {
-			fprintf(stderr,
-				"read failed about %s\n", comp);
+			blog_info("read failed about %s\n", comp);
 			fclose(fp);
 			return -EIO;
 		}
 
-
 		if (!strcmp(buf, "u-boot,env")) {
-			bytes = asprintf(&nvmem, "%s/%s/nvmem", path, dent->d_name);
+			bytes = asprintf(&nvmem, "%s/%s/nvmem", path,
+					 dent->d_name);
 			if (bytes < 0) {
 				nvmem = NULL;
 			}
@@ -1796,9 +1774,9 @@ static int parse_config(struct env_opts *opts)
 	/* Fills in DEVNAME(), ENVSIZE(), DEVESIZE(). Or don't. */
 	if (get_config(opts->config_file)) {
 		if (find_nvmem_device()) {
-			fprintf(stderr, "Cannot parse config file '%s': %m\n",
-				opts->config_file);
-			fprintf(stderr, "Failed to find NVMEM device\n");
+			blog_info("Cannot parse config file '%s': %m\n",
+				  opts->config_file);
+			blog_info("Failed to find NVMEM device\n");
 			return -1;
 		}
 	}
@@ -1844,8 +1822,7 @@ static int parse_config(struct env_opts *opts)
 			return rc;
 
 		if (ENVSIZE(0) != ENVSIZE(1)) {
-			fprintf(stderr,
-				"Redundant environments have unequal size\n");
+			blog_info("Redundant environments have unequal size\n");
 			return -1;
 		}
 	}
@@ -1876,10 +1853,9 @@ static int get_config(char *fname)
 		if (line[0] == '#')
 			continue;
 
-		rc = sscanf(line, "%ms %lli %lx %lx %lx",
-			    &devname,
-			    &DEVOFFSET(i),
-			    &ENVSIZE(i), &DEVESIZE(i), &ENVSECTORS(i));
+		rc = sscanf(line, "%ms %lli %lx %lx %lx", &devname,
+			    &DEVOFFSET(i), &ENVSIZE(i), &DEVESIZE(i),
+			    &ENVSECTORS(i));
 
 		if (rc < 3)
 			continue;
@@ -1896,7 +1872,7 @@ static int get_config(char *fname)
 	fclose(fp);
 
 	have_redund_env = i - 1;
-	if (!i) {		/* No valid entries found */
+	if (!i) { /* No valid entries found */
 		errno = EINVAL;
 		return -1;
 	} else

@@ -62,79 +62,79 @@ static void usb_display_class_sub(unsigned char dclass, unsigned char subclass,
 {
 	switch (dclass) {
 	case USB_CLASS_PER_INTERFACE:
-		printf("See Interface");
+		blog_info("See Interface");
 		break;
 	case USB_CLASS_HID:
-		printf("Human Interface, Subclass: ");
+		blog_info("Human Interface, Subclass: ");
 		switch (subclass) {
 		case USB_SUB_HID_NONE:
-			printf("None");
+			blog_info("None");
 			break;
 		case USB_SUB_HID_BOOT:
-			printf("Boot ");
+			blog_info("Boot ");
 			switch (proto) {
 			case USB_PROT_HID_NONE:
-				printf("None");
+				blog_info("None");
 				break;
 			case USB_PROT_HID_KEYBOARD:
-				printf("Keyboard");
+				blog_info("Keyboard");
 				break;
 			case USB_PROT_HID_MOUSE:
-				printf("Mouse");
+				blog_info("Mouse");
 				break;
 			default:
-				printf("reserved");
+				blog_info("reserved");
 				break;
 			}
 			break;
 		default:
-			printf("reserved");
+			blog_info("reserved");
 			break;
 		}
 		break;
 	case USB_CLASS_MASS_STORAGE:
-		printf("Mass Storage, ");
+		blog_info("Mass Storage, ");
 		switch (subclass) {
 		case US_SC_RBC:
-			printf("RBC ");
+			blog_info("RBC ");
 			break;
 		case US_SC_8020:
-			printf("SFF-8020i (ATAPI)");
+			blog_info("SFF-8020i (ATAPI)");
 			break;
 		case US_SC_QIC:
-			printf("QIC-157 (Tape)");
+			blog_info("QIC-157 (Tape)");
 			break;
 		case US_SC_UFI:
-			printf("UFI");
+			blog_info("UFI");
 			break;
 		case US_SC_8070:
-			printf("SFF-8070");
+			blog_info("SFF-8070");
 			break;
 		case US_SC_SCSI:
-			printf("Transp. SCSI");
+			blog_info("Transp. SCSI");
 			break;
 		default:
-			printf("reserved");
+			blog_info("reserved");
 			break;
 		}
-		printf(", ");
+		blog_info(", ");
 		switch (proto) {
 		case US_PR_CB:
-			printf("Command/Bulk");
+			blog_info("Command/Bulk");
 			break;
 		case US_PR_CBI:
-			printf("Command/Bulk/Int");
+			blog_info("Command/Bulk/Int");
 			break;
 		case US_PR_BULK:
-			printf("Bulk only");
+			blog_info("Bulk only");
 			break;
 		default:
-			printf("reserved");
+			blog_info("reserved");
 			break;
 		}
 		break;
 	default:
-		printf("%s", usb_get_class_desc(dclass));
+		blog_info("%s", usb_get_class_desc(dclass));
 		break;
 	}
 }
@@ -145,7 +145,7 @@ static void usb_display_string(struct usb_device *dev, int index)
 
 	if (index != 0) {
 		if (usb_string(dev, index, &buffer[0], 256) > 0)
-			printf("String: \"%s\"", buffer);
+			blog_info("String: \"%s\"", buffer);
 	}
 }
 
@@ -154,31 +154,31 @@ static void usb_display_desc(struct usb_device *dev)
 	uint packet_size = dev->descriptor.bMaxPacketSize0;
 
 	if (dev->descriptor.bDescriptorType == USB_DT_DEVICE) {
-		printf("%d: %s,  USB Revision %x.%x\n", dev->devnum,
+		blog_info("%d: %s,  USB Revision %x.%x\n", dev->devnum,
 		usb_get_class_desc(dev->config.if_desc[0].desc.bInterfaceClass),
 				   (dev->descriptor.bcdUSB>>8) & 0xff,
 				   dev->descriptor.bcdUSB & 0xff);
 
 		if (strlen(dev->mf) || strlen(dev->prod) ||
 		    strlen(dev->serial))
-			printf(" - %s %s %s\n", dev->mf, dev->prod,
+			blog_info(" - %s %s %s\n", dev->mf, dev->prod,
 				dev->serial);
 		if (dev->descriptor.bDeviceClass) {
-			printf(" - Class: ");
+			blog_info(" - Class: ");
 			usb_display_class_sub(dev->descriptor.bDeviceClass,
 					      dev->descriptor.bDeviceSubClass,
 					      dev->descriptor.bDeviceProtocol);
-			printf("\n");
+			blog_info("\n");
 		} else {
-			printf(" - Class: (from Interface) %s\n",
+			blog_info(" - Class: (from Interface) %s\n",
 			       usb_get_class_desc(
 				dev->config.if_desc[0].desc.bInterfaceClass));
 		}
 		if (dev->descriptor.bcdUSB >= cpu_to_le16(0x0300))
 			packet_size = 1 << packet_size;
-		printf(" - PacketSize: %d  Configurations: %d\n",
+		blog_info(" - PacketSize: %d  Configurations: %d\n",
 			packet_size, dev->descriptor.bNumConfigurations);
-		printf(" - Vendor: 0x%04x  Product 0x%04x Version %d.%d\n",
+		blog_info(" - Vendor: 0x%04x  Product 0x%04x Version %d.%d\n",
 			dev->descriptor.idVendor, dev->descriptor.idProduct,
 			(dev->descriptor.bcdDevice>>8) & 0xff,
 			dev->descriptor.bcdDevice & 0xff);
@@ -189,57 +189,57 @@ static void usb_display_desc(struct usb_device *dev)
 static void usb_display_conf_desc(struct usb_config_descriptor *config,
 				  struct usb_device *dev)
 {
-	printf("   Configuration: %d\n", config->bConfigurationValue);
-	printf("   - Interfaces: %d %s%s%dmA\n", config->bNumInterfaces,
+	blog_info("   Configuration: %d\n", config->bConfigurationValue);
+	blog_info("   - Interfaces: %d %s%s%dmA\n", config->bNumInterfaces,
 	       (config->bmAttributes & 0x40) ? "Self Powered " : "Bus Powered ",
 	       (config->bmAttributes & 0x20) ? "Remote Wakeup " : "",
 		config->bMaxPower*2);
 	if (config->iConfiguration) {
-		printf("   - ");
+		blog_info("   - ");
 		usb_display_string(dev, config->iConfiguration);
-		printf("\n");
+		blog_info("\n");
 	}
 }
 
 static void usb_display_if_desc(struct usb_interface_descriptor *ifdesc,
 				struct usb_device *dev)
 {
-	printf("     Interface: %d\n", ifdesc->bInterfaceNumber);
-	printf("     - Alternate Setting %d, Endpoints: %d\n",
+	blog_info("     Interface: %d\n", ifdesc->bInterfaceNumber);
+	blog_info("     - Alternate Setting %d, Endpoints: %d\n",
 		ifdesc->bAlternateSetting, ifdesc->bNumEndpoints);
-	printf("     - Class ");
+	blog_info("     - Class ");
 	usb_display_class_sub(ifdesc->bInterfaceClass,
 		ifdesc->bInterfaceSubClass, ifdesc->bInterfaceProtocol);
-	printf("\n");
+	blog_info("\n");
 	if (ifdesc->iInterface) {
-		printf("     - ");
+		blog_info("     - ");
 		usb_display_string(dev, ifdesc->iInterface);
-		printf("\n");
+		blog_info("\n");
 	}
 }
 
 static void usb_display_ep_desc(struct usb_endpoint_descriptor *epdesc)
 {
-	printf("     - Endpoint %d %s ", epdesc->bEndpointAddress & 0xf,
+	blog_info("     - Endpoint %d %s ", epdesc->bEndpointAddress & 0xf,
 		(epdesc->bEndpointAddress & 0x80) ? "In" : "Out");
 	switch ((epdesc->bmAttributes & 0x03)) {
 	case 0:
-		printf("Control");
+		blog_info("Control");
 		break;
 	case 1:
-		printf("Isochronous");
+		blog_info("Isochronous");
 		break;
 	case 2:
-		printf("Bulk");
+		blog_info("Bulk");
 		break;
 	case 3:
-		printf("Interrupt");
+		blog_info("Interrupt");
 		break;
 	}
-	printf(" MaxPacket %d", get_unaligned(&epdesc->wMaxPacketSize));
+	blog_info(" MaxPacket %d", get_unaligned(&epdesc->wMaxPacketSize));
 	if ((epdesc->bmAttributes & 0x03) == 0x3)
-		printf(" Interval %dms", epdesc->bInterval);
-	printf("\n");
+		blog_info(" Interval %dms", epdesc->bInterval);
+	blog_info("\n");
 }
 
 /* main routine to diasplay the configs, interfaces and endpoints */
@@ -260,7 +260,7 @@ static void usb_display_config(struct usb_device *dev)
 			usb_display_ep_desc(epdesc);
 		}
 	}
-	printf("\n");
+	blog_info("\n");
 }
 
 /*
@@ -339,7 +339,7 @@ static void usb_show_tree_graph(struct usb_device *dev, char *pre)
 	int has_child, last_child;
 
 	index = strlen(pre);
-	printf(" %s", pre);
+	blog_info(" %s", pre);
 #ifdef CONFIG_DM_USB
 	has_child = device_has_active_children(dev->dev);
 	if (device_get_uclass_id(dev->dev) == UCLASS_MASS_STORAGE) {
@@ -386,24 +386,24 @@ static void usb_show_tree_graph(struct usb_device *dev, char *pre)
 			} /* device found */
 		} /* for all children of the parent */
 #endif
-		printf("\b+-");
+		blog_info("\b+-");
 		/* correct last child */
 		if (last_child && index)
 			pre[index-1] = ' ';
 	} /* if not root hub */
 	else
-		printf(" ");
-	printf("%d ", dev->devnum);
+		blog_info(" ");
+	blog_info("%d ", dev->devnum);
 	pre[index++] = ' ';
 	pre[index++] = has_child ? '|' : ' ';
 	pre[index] = 0;
-	printf(" %s (%s, %dmA)\n", usb_get_class_desc(
+	blog_info(" %s (%s, %dmA)\n", usb_get_class_desc(
 					dev->config.if_desc[0].desc.bInterfaceClass),
 					portspeed(dev->speed),
 					dev->config.desc.bMaxPower * 2);
 	if (strlen(dev->mf) || strlen(dev->prod) || strlen(dev->serial))
-		printf(" %s  %s %s %s\n", pre, dev->mf, dev->prod, dev->serial);
-	printf(" %s\n", pre);
+		blog_info(" %s  %s %s %s\n", pre, dev->mf, dev->prod, dev->serial);
+	blog_info(" %s\n", pre);
 #ifdef CONFIG_DM_USB
 	struct udevice *child;
 
@@ -498,56 +498,56 @@ static int usb_test(struct usb_device *dev, int port, char* arg)
 	int mode;
 
 	if (port > dev->maxchild) {
-		printf("Device is no hub or does not have %d ports.\n", port);
+		blog_info("Device is no hub or does not have %d ports.\n", port);
 		return 1;
 	}
 
 	switch (arg[0]) {
 	case 'J':
 	case 'j':
-		printf("Setting Test_J mode");
+		blog_info("Setting Test_J mode");
 		mode = USB_TEST_MODE_J;
 		break;
 	case 'K':
 	case 'k':
-		printf("Setting Test_K mode");
+		blog_info("Setting Test_K mode");
 		mode = USB_TEST_MODE_K;
 		break;
 	case 'S':
 	case 's':
-		printf("Setting Test_SE0_NAK mode");
+		blog_info("Setting Test_SE0_NAK mode");
 		mode = USB_TEST_MODE_SE0_NAK;
 		break;
 	case 'P':
 	case 'p':
-		printf("Setting Test_Packet mode");
+		blog_info("Setting Test_Packet mode");
 		mode = USB_TEST_MODE_PACKET;
 		break;
 	case 'F':
 	case 'f':
-		printf("Setting Test_Force_Enable mode");
+		blog_info("Setting Test_Force_Enable mode");
 		mode = USB_TEST_MODE_FORCE_ENABLE;
 		break;
 	default:
-		printf("Unrecognized test mode: %s\nAvailable modes: "
+		blog_info("Unrecognized test mode: %s\nAvailable modes: "
 		       "J, K, S[E0_NAK], P[acket], F[orce_Enable]\n", arg);
 		return 1;
 	}
 
 	if (port)
-		printf(" on downstream facing port %d...\n", port);
+		blog_info(" on downstream facing port %d...\n", port);
 	else
-		printf(" on upstream facing port...\n");
+		blog_info(" on upstream facing port...\n");
 
 	if (usb_control_msg(dev, usb_sndctrlpipe(dev, 0), USB_REQ_SET_FEATURE,
 			    port ? USB_RT_PORT : USB_RECIP_DEVICE,
 			    port ? USB_PORT_FEAT_TEST : USB_FEAT_TEST,
 			    (mode << 8) | port,
 			    NULL, 0, USB_CNTL_TIMEOUT) == -1) {
-		printf("Error during SET_FEATURE.\n");
+		blog_info("Error during SET_FEATURE.\n");
 		return 1;
 	} else {
-		printf("Test mode successfully set. Use 'usb start' "
+		blog_info("Test mode successfully set. Use 'usb start' "
 		       "to return to normal operation.\n");
 		return 0;
 	}
@@ -569,7 +569,7 @@ static int do_usb_stop_keyboard(int force)
 {
 #if !defined CONFIG_DM_USB && defined CONFIG_USB_KEYBOARD
 	if (usb_kbd_deregister(force) != 0) {
-		printf("USB not stopped: usbkbd still using USB\n");
+		blog_info("USB not stopped: usbkbd still using USB\n");
 		return 1;
 	}
 #endif
@@ -631,13 +631,13 @@ static int do_usb(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 	if (strncmp(argv[1], "start", 5) == 0) {
 		if (usb_started)
 			return 0; /* Already started */
-		printf("starting USB...\n");
+		blog_info("starting USB...\n");
 		do_usb_start();
 		return 0;
 	}
 
 	if (strncmp(argv[1], "reset", 5) == 0) {
-		printf("resetting USB...\n");
+		blog_info("resetting USB...\n");
 		if (do_usb_stop_keyboard(1) != 0)
 			return 1;
 		usb_stop();
@@ -649,12 +649,12 @@ static int do_usb(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 			console_assign(stdin, "serial");
 		if (do_usb_stop_keyboard(0) != 0)
 			return 1;
-		printf("stopping USB..\n");
+		blog_info("stopping USB..\n");
 		usb_stop();
 		return 0;
 	}
 	if (!usb_started) {
-		printf("USB is stopped. Please issue 'usb start' first.\n");
+		blog_info("USB is stopped. Please issue 'usb start' first.\n");
 		return 1;
 	}
 	if (strncmp(argv[1], "tree", 4) == 0) {
@@ -684,10 +684,10 @@ static int do_usb(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 			 * starts at 1 on each bus.
 			 */
 			i = dectoul(argv[2], NULL);
-			printf("config for device %d\n", i);
+			blog_info("config for device %d\n", i);
 			udev = usb_find_device(i);
 			if (udev == NULL) {
-				printf("*** No device available ***\n");
+				blog_info("*** No device available ***\n");
 				return 0;
 			} else {
 				usb_display_desc(udev);
@@ -702,7 +702,7 @@ static int do_usb(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 		i = dectoul(argv[2], NULL);
 		udev = usb_find_device(i);
 		if (udev == NULL) {
-			printf("Device %d does not exist.\n", i);
+			blog_info("Device %d does not exist.\n", i);
 			return 1;
 		}
 		i = dectoul(argv[3], NULL);

@@ -292,7 +292,7 @@ int mmc_poll_for_busy(struct mmc *mmc, int timeout_ms)
 
 		if (status & MMC_STATUS_MASK) {
 #if !defined(CONFIG_SPL_BUILD) || defined(CONFIG_SPL_LIBCOMMON_SUPPORT)
-			pr_err("Status Error: 0x%08x\n", status);
+			blog_err("Status Error: 0x%08x\n", status);
 #endif
 			return -ECOMM;
 		}
@@ -305,7 +305,7 @@ int mmc_poll_for_busy(struct mmc *mmc, int timeout_ms)
 
 	if (timeout_ms <= 0) {
 #if !defined(CONFIG_SPL_BUILD) || defined(CONFIG_SPL_LIBCOMMON_SUPPORT)
-		pr_err("Timeout waiting card ready\n");
+		blog_err("Timeout waiting card ready\n");
 #endif
 		return -ETIMEDOUT;
 	}
@@ -430,7 +430,7 @@ static int mmc_read_blocks(struct mmc *mmc, void *dst, lbaint_t start,
 		cmd.resp_type = MMC_RSP_R1b;
 		if (mmc_send_cmd(mmc, &cmd, NULL)) {
 #if !defined(CONFIG_SPL_BUILD) || defined(CONFIG_SPL_LIBCOMMON_SUPPORT)
-			pr_err("mmc fail to send stop cmd\n");
+			blog_err("mmc fail to send stop cmd\n");
 #endif
 			return 0;
 		}
@@ -481,7 +481,7 @@ ulong mmc_bread(struct blk_desc *block_dev, lbaint_t start, lbaint_t blkcnt,
 
 	if ((start + blkcnt) > block_dev->lba) {
 #if !defined(CONFIG_SPL_BUILD) || defined(CONFIG_SPL_LIBCOMMON_SUPPORT)
-		pr_err("MMC: block number 0x" LBAF " exceeds max(0x" LBAF ")\n",
+		blog_err("MMC: block number 0x" LBAF " exceeds max(0x" LBAF ")\n",
 		       start + blkcnt, block_dev->lba);
 #endif
 		return 0;
@@ -978,7 +978,7 @@ static int mmc_get_capabilities(struct mmc *mmc)
 		return 0;
 
 	if (!ext_csd) {
-		pr_err("No ext_csd found!\n"); /* this should enver happen */
+		blog_err("No ext_csd found!\n"); /* this should enver happen */
 		return -ENOTSUPP;
 	}
 
@@ -1090,17 +1090,17 @@ int mmc_hwpart_config(struct mmc *mmc,
 		return -EINVAL;
 
 	if (IS_SD(mmc) || (mmc->version < MMC_VERSION_4_41)) {
-		pr_err("eMMC >= 4.4 required for enhanced user data area\n");
+		blog_err("eMMC >= 4.4 required for enhanced user data area\n");
 		return -EMEDIUMTYPE;
 	}
 
 	if (!(mmc->part_support & PART_SUPPORT)) {
-		pr_err("Card does not support partitioning\n");
+		blog_err("Card does not support partitioning\n");
 		return -EMEDIUMTYPE;
 	}
 
 	if (!mmc->hc_wp_grp_size) {
-		pr_err("Card does not define HC WP group size\n");
+		blog_err("Card does not define HC WP group size\n");
 		return -EMEDIUMTYPE;
 	}
 
@@ -1108,7 +1108,7 @@ int mmc_hwpart_config(struct mmc *mmc,
 	if (conf->user.enh_size) {
 		if (conf->user.enh_size % mmc->hc_wp_grp_size ||
 		    conf->user.enh_start % mmc->hc_wp_grp_size) {
-			pr_err("User data enhanced area not HC WP group "
+			blog_err("User data enhanced area not HC WP group "
 			       "size aligned\n");
 			return -EINVAL;
 		}
@@ -1127,7 +1127,7 @@ int mmc_hwpart_config(struct mmc *mmc,
 
 	for (pidx = 0; pidx < 4; pidx++) {
 		if (conf->gp_part[pidx].size % mmc->hc_wp_grp_size) {
-			pr_err("GP%i partition not HC WP group size "
+			blog_err("GP%i partition not HC WP group size "
 			       "aligned\n", pidx+1);
 			return -EINVAL;
 		}
@@ -1139,7 +1139,7 @@ int mmc_hwpart_config(struct mmc *mmc,
 	}
 
 	if (part_attrs && ! (mmc->part_support & ENHNCD_SUPPORT)) {
-		pr_err("Card does not support enhanced attribute\n");
+		blog_err("Card does not support enhanced attribute\n");
 		return -EMEDIUMTYPE;
 	}
 
@@ -1152,7 +1152,7 @@ int mmc_hwpart_config(struct mmc *mmc,
 		(ext_csd[EXT_CSD_MAX_ENH_SIZE_MULT+1] << 8) +
 		ext_csd[EXT_CSD_MAX_ENH_SIZE_MULT];
 	if (tot_enh_size_mult > max_enh_size_mult) {
-		pr_err("Total enhanced size exceeds maximum (%u > %u)\n",
+		blog_err("Total enhanced size exceeds maximum (%u > %u)\n",
 		       tot_enh_size_mult, max_enh_size_mult);
 		return -EMEDIUMTYPE;
 	}
@@ -1186,7 +1186,7 @@ int mmc_hwpart_config(struct mmc *mmc,
 
 	if (ext_csd[EXT_CSD_PARTITION_SETTING] &
 	    EXT_CSD_PARTITION_SETTING_COMPLETED) {
-		pr_err("Card already partitioned\n");
+		blog_err("Card already partitioned\n");
 		return -EPERM;
 	}
 
@@ -1850,7 +1850,7 @@ error:
 		}
 	}
 
-	pr_err("unable to select a mode\n");
+	blog_err("unable to select a mode\n");
 	return -ENOTSUPP;
 }
 
@@ -2227,7 +2227,7 @@ error:
 		}
 	}
 
-	pr_err("unable to select a mode : %d\n", err);
+	blog_err("unable to select a mode : %d\n", err);
 
 	return -ENOTSUPP;
 }
@@ -2881,7 +2881,7 @@ retry:
 		if (err) {
 #if !defined(CONFIG_SPL_BUILD) || defined(CONFIG_SPL_LIBCOMMON_SUPPORT)
 			if (!quiet)
-				pr_err("Card did not respond to voltage select! : %d\n", err);
+				blog_err("Card did not respond to voltage select! : %d\n", err);
 #endif
 			return -EOPNOTSUPP;
 		}
@@ -2914,7 +2914,7 @@ int mmc_start_init(struct mmc *mmc)
 						   | MMC_CAP(MMC_LEGACY) |
 						   MMC_MODE_1BIT);
 			} else {
-				pr_err("bus_mode requested is not supported\n");
+				blog_err("bus_mode requested is not supported\n");
 				return -EINVAL;
 			}
 		}
@@ -2934,7 +2934,7 @@ int mmc_start_init(struct mmc *mmc)
 	if (no_card) {
 		mmc->has_init = 0;
 #if !defined(CONFIG_SPL_BUILD) || defined(CONFIG_SPL_LIBCOMMON_SUPPORT)
-		pr_err("MMC: no card present\n");
+		blog_err("MMC: no card present\n");
 #endif
 		return -ENOMEDIUM;
 	}
@@ -3062,7 +3062,7 @@ static int mmc_probe(struct bd_info *bis)
 	uclass_foreach_dev(dev, uc) {
 		ret = device_probe(dev);
 		if (ret)
-			pr_err("%s - probe failed: %d\n", dev->name, ret);
+			blog_err("%s - probe failed: %d\n", dev->name, ret);
 	}
 
 	return 0;

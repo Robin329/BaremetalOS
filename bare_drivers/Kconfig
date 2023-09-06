@@ -9,10 +9,16 @@ config BAREMETAL_OS
 if BAREMETAL_OS
 
 config BAREMETAL_REG_DEBUG
-    bool "Enable register print debug"
-    default n
+    int "Enable register print debug"
+    default 0
     help
       Enable baremetal OS registers print.
+config BAREMETAL_LOGLEVEL
+    int "Baremetal LOG level."
+    default 3
+    help
+      print log level(0=off,1=error, 2=warn, 3=info, 4=debug).
+
 
 source "bare_drivers/hello/Kconfig"
 

@@ -18,7 +18,7 @@
 #undef	PART_DEBUG
 
 #ifdef	PART_DEBUG
-#define	PRINTF(fmt,args...)	printf (fmt ,##args)
+#define	PRINTF(fmt,args...)	blog_info (fmt ,##args)
 #else
 #define PRINTF(fmt,args...)
 #endif
@@ -122,7 +122,7 @@ void dev_print(struct blk_desc *dev_desc)
 
 	switch (dev_desc->uclass_id) {
 	case UCLASS_SCSI:
-		printf ("(%d:%d) Vendor: %s Prod.: %s Rev: %s\n",
+		blog_info ("(%d:%d) Vendor: %s Prod.: %s Rev: %s\n",
 			dev_desc->target,dev_desc->lun,
 			dev_desc->vendor,
 			dev_desc->product,
@@ -130,7 +130,7 @@ void dev_print(struct blk_desc *dev_desc)
 		break;
 	case UCLASS_IDE:
 	case UCLASS_AHCI:
-		printf ("Model: %s Firm: %s Ser#: %s\n",
+		blog_info ("Model: %s Firm: %s Ser#: %s\n",
 			dev_desc->vendor,
 			dev_desc->revision,
 			dev_desc->product);
@@ -141,22 +141,22 @@ void dev_print(struct blk_desc *dev_desc)
 	case UCLASS_PVBLOCK:
 	case UCLASS_HOST:
 	case UCLASS_BLKMAP:
-		printf ("Vendor: %s Rev: %s Prod: %s\n",
+		blog_info ("Vendor: %s Rev: %s Prod: %s\n",
 			dev_desc->vendor,
 			dev_desc->revision,
 			dev_desc->product);
 		break;
 	case UCLASS_VIRTIO:
-		printf("%s VirtIO Block Device\n", dev_desc->vendor);
+		blog_info("%s VirtIO Block Device\n", dev_desc->vendor);
 		break;
 	case UCLASS_EFI_MEDIA:
-		printf("EFI media Block Device %d\n", dev_desc->devnum);
+		blog_info("EFI media Block Device %d\n", dev_desc->devnum);
 		break;
 	case UCLASS_INVALID:
 		puts("device type unknown\n");
 		return;
 	default:
-		printf("Unhandled device type: %i\n", dev_desc->uclass_id);
+		blog_info("Unhandled device type: %i\n", dev_desc->uclass_id);
 		return;
 	}
 	puts ("            Type: ");
@@ -176,7 +176,7 @@ void dev_print(struct blk_desc *dev_desc)
 		puts ("Tape");
 		break;
 	default:
-		printf ("# %02X #", dev_desc->type & 0x1F);
+		blog_info ("# %02X #", dev_desc->type & 0x1F);
 		break;
 	}
 	puts ("\n");
@@ -199,16 +199,16 @@ void dev_print(struct blk_desc *dev_desc)
 		gb_rem	= gb - (10 * gb_quot);
 #ifdef CONFIG_LBA48
 		if (dev_desc->lba48)
-			printf ("            Supports 48-bit addressing\n");
+			blog_info ("            Supports 48-bit addressing\n");
 #endif
 #if defined(CONFIG_SYS_64BIT_LBA)
-		printf ("            Capacity: %lu.%lu MB = %lu.%lu GB (%llu x %lu)\n",
+		blog_info ("            Capacity: %lu.%lu MB = %lu.%lu GB (%llu x %lu)\n",
 			mb_quot, mb_rem,
 			gb_quot, gb_rem,
 			lba,
 			dev_desc->blksz);
 #else
-		printf ("            Capacity: %lu.%lu MB = %lu.%lu GB (%lu x %lu)\n",
+		blog_info ("            Capacity: %lu.%lu MB = %lu.%lu GB (%lu x %lu)\n",
 			mb_quot, mb_rem,
 			gb_quot, gb_rem,
 			(ulong)lba,
@@ -284,7 +284,7 @@ static void print_part_header(const char *type, struct blk_desc *dev_desc)
 		puts("UNKNOWN");
 		break;
 	}
-	printf (" device %d  --   Partition Type: %s\n\n",
+	blog_info (" device %d  --   Partition Type: %s\n\n",
 			dev_desc->devnum, type);
 #endif /* any CONFIG_..._PARTITION */
 }
@@ -295,7 +295,7 @@ void part_print(struct blk_desc *dev_desc)
 
 	drv = part_driver_lookup_type(dev_desc);
 	if (!drv) {
-		printf("## Unknown partition table type %x\n",
+		blog_info("## Unknown partition table type %x\n",
 		       dev_desc->part_type);
 		return;
 	}
@@ -380,7 +380,7 @@ int blk_get_device_by_str(const char *ifname, const char *dev_hwpart_str,
 
 	dev = hextoul(dev_str, &ep);
 	if (*ep) {
-		printf("** Bad device specification %s %s **\n",
+		blog_info("** Bad device specification %s %s **\n",
 		       ifname, dev_str);
 		dev = -EINVAL;
 		goto cleanup;
@@ -389,7 +389,7 @@ int blk_get_device_by_str(const char *ifname, const char *dev_hwpart_str,
 	if (hwpart_str) {
 		hwpart = hextoul(hwpart_str, &ep);
 		if (*ep) {
-			printf("** Bad HW partition specification %s %s **\n",
+			blog_info("** Bad HW partition specification %s %s **\n",
 			    ifname, hwpart_str);
 			dev = -EINVAL;
 			goto cleanup;
@@ -457,7 +457,7 @@ int blk_get_device_part_str(const char *ifname, const char *dev_part_str,
 	 */
 	if (!strcmp(ifname, "ubi")) {
 		if (!ubifs_is_mounted()) {
-			printf("UBIFS not mounted, use ubifsmount to mount volume first!\n");
+			blog_info("UBIFS not mounted, use ubifsmount to mount volume first!\n");
 			return -EINVAL;
 		}
 
@@ -474,7 +474,7 @@ int blk_get_device_part_str(const char *ifname, const char *dev_part_str,
 
 	/* If still no dev_part_str, it's an error */
 	if (!dev_part_str) {
-		printf("** No device specified **\n");
+		blog_info("** No device specified **\n");
 		ret = -ENODEV;
 		goto cleanup;
 	}
@@ -493,7 +493,7 @@ int blk_get_device_part_str(const char *ifname, const char *dev_part_str,
 	/* Look up the device */
 	dev = blk_get_device_by_str(ifname, dev_str, dev_desc);
 	if (dev < 0) {
-		printf("** Bad device specification %s %s **\n",
+		blog_info("** Bad device specification %s %s **\n",
 		       ifname, dev_str);
 		ret = dev;
 		goto cleanup;
@@ -512,7 +512,7 @@ int blk_get_device_part_str(const char *ifname, const char *dev_part_str,
 		 * or request for whole device, but caller requires partition.
 		 */
 		if (*ep || (part == 0 && !allow_whole_dev)) {
-			printf("** Bad partition specification %s %s **\n",
+			blog_info("** Bad partition specification %s %s **\n",
 			    ifname, dev_part_str);
 			ret = -ENOENT;
 			goto cleanup;
@@ -526,7 +526,7 @@ int blk_get_device_part_str(const char *ifname, const char *dev_part_str,
 	if (((*dev_desc)->part_type == PART_TYPE_UNKNOWN) ||
 	    (part == 0)) {
 		if (!(*dev_desc)->lba) {
-			printf("** Bad device size - %s %s **\n", ifname,
+			blog_info("** Bad device size - %s %s **\n", ifname,
 			       dev_str);
 			ret = -EINVAL;
 			goto cleanup;
@@ -538,7 +538,7 @@ int blk_get_device_part_str(const char *ifname, const char *dev_part_str,
 		 * it's an error.
 		 */
 		if ((part > 0) || (!allow_whole_dev)) {
-			printf("** No partition table - %s %s **\n", ifname,
+			blog_info("** No partition table - %s %s **\n", ifname,
 			       dev_str);
 			ret = -EPROTONOSUPPORT;
 			goto cleanup;
@@ -566,7 +566,7 @@ int blk_get_device_part_str(const char *ifname, const char *dev_part_str,
 	if (part != PART_AUTO) {
 		ret = part_get_info(*dev_desc, part, info);
 		if (ret) {
-			printf("** Invalid partition %d **\n", part);
+			blog_info("** Invalid partition %d **\n", part);
 			goto cleanup;
 		}
 	} else {
@@ -608,12 +608,12 @@ int blk_get_device_part_str(const char *ifname, const char *dev_part_str,
 			if (p == MAX_SEARCH_PARTITIONS + 1)
 				*info = tmpinfo;
 		} else {
-			printf("** No valid partitions found **\n");
+			blog_info("** No valid partitions found **\n");
 			goto cleanup;
 		}
 	}
 	if (strncmp((char *)info->type, BOOT_PART_TYPE, sizeof(info->type)) != 0) {
-		printf("** Invalid partition type \"%.32s\""
+		blog_info("** Invalid partition type \"%.32s\""
 			" (expect \"" BOOT_PART_TYPE "\")\n",
 			info->type);
 		ret  = -EINVAL;
@@ -713,7 +713,7 @@ static int part_get_info_by_dev_and_name(const char *dev_iface,
 
 	ret = part_get_info_by_name(*dev_desc, part_str, part_info);
 	if (ret < 0)
-		printf("Could not find \"%s\" partition\n", part_str);
+		blog_info("Could not find \"%s\" partition\n", part_str);
 
 cleanup:
 	free(dup_str);
@@ -740,7 +740,7 @@ int part_get_info_by_dev_and_name_or_num(const char *dev_iface,
 	ret = blk_get_device_part_str(dev_iface, dev_part_str,
 				      dev_desc, part_info, allow_whole_dev);
 	if (ret < 0)
-		printf("Couldn't find partition %s %s\n",
+		blog_info("Couldn't find partition %s %s\n",
 		       dev_iface, dev_part_str);
 	return ret;
 }

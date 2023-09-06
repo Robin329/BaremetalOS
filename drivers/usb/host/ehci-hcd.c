@@ -187,7 +187,7 @@ static int ehci_reset(struct ehci_ctrl *ctrl)
 	ret = handshake((uint32_t *)&ctrl->hcor->or_usbcmd,
 			CMD_RESET, 0, 250 * 1000);
 	if (ret < 0) {
-		printf("EHCI fail to reset\n");
+		blog_info("EHCI fail to reset\n");
 		goto out;
 	}
 
@@ -263,7 +263,7 @@ static int ehci_td_buffer(struct qTD *td, void *buf, size_t sz)
 	}
 
 	if (idx == QT_BUFFER_CNT) {
-		printf("out of buffer pointers (%zu bytes left)\n", sz);
+		blog_info("out of buffer pointers (%zu bytes left)\n", sz);
 		return -1;
 	}
 
@@ -313,7 +313,7 @@ static int ehci_enable_async(struct ehci_ctrl *ctrl)
 	ret = handshake((uint32_t *)&ctrl->hcor->or_usbsts, STS_ASS, STS_ASS,
 			100 * 1000);
 	if (ret < 0)
-		printf("EHCI fail timeout STS_ASS set\n");
+		blog_info("EHCI fail timeout STS_ASS set\n");
 
 	return ret;
 }
@@ -337,7 +337,7 @@ static int ehci_disable_async(struct ehci_ctrl *ctrl)
 	ret = handshake((uint32_t *)&ctrl->hcor->or_usbsts, STS_ASS, 0,
 			100 * 1000);
 	if (ret < 0)
-		printf("EHCI fail timeout STS_ASS reset\n");
+		blog_info("EHCI fail timeout STS_ASS reset\n");
 
 	return ret;
 }
@@ -355,7 +355,7 @@ static int ehci_iaa_cycle(struct ehci_ctrl *ctrl)
 	ret = handshake(&ctrl->hcor->or_usbsts, STS_IAA, STS_IAA,
 			10 * 1000); /* 10ms timeout */
 	if (ret < 0)
-		printf("EHCI fail timeout STS_IAA set\n");
+		blog_info("EHCI fail timeout STS_IAA set\n");
 
 	status = ehci_readl(&ctrl->hcor->or_usbsts);
 	if (status & STS_IAA)
@@ -451,7 +451,7 @@ ehci_submit_async(struct usb_device *dev, unsigned long pipe, void *buffer,
 #endif
 	qtd = memalign(USB_DMA_MINALIGN, qtd_count * sizeof(struct qTD));
 	if (qtd == NULL) {
-		printf("unable to allocate TDs\n");
+		blog_info("unable to allocate TDs\n");
 		return -1;
 	}
 
@@ -511,7 +511,7 @@ ehci_submit_async(struct usb_device *dev, unsigned long pipe, void *buffer,
 			QT_TOKEN_STATUS(QT_TOKEN_STATUS_ACTIVE);
 		qtd[qtd_counter].qt_token = cpu_to_hc32(token);
 		if (ehci_td_buffer(&qtd[qtd_counter], req, sizeof(*req))) {
-			printf("unable to construct SETUP TD\n");
+			blog_info("unable to construct SETUP TD\n");
 			goto fail;
 		}
 		/* Update previous qTD! */
@@ -570,7 +570,7 @@ ehci_submit_async(struct usb_device *dev, unsigned long pipe, void *buffer,
 			qtd[qtd_counter].qt_token = cpu_to_hc32(token);
 			if (ehci_td_buffer(&qtd[qtd_counter], buf_ptr,
 						xfr_bytes)) {
-				printf("unable to construct DATA TD\n");
+				blog_info("unable to construct DATA TD\n");
 				goto fail;
 			}
 			/* Update previous qTD! */
@@ -669,7 +669,7 @@ ehci_submit_async(struct usb_device *dev, unsigned long pipe, void *buffer,
 
 	/* Check that the TD processing happened */
 	if (QT_TOKEN_GET_STATUS(token) & QT_TOKEN_STATUS_ACTIVE)
-		printf("EHCI timed out on TD - token=%#x\n", token);
+		blog_info("EHCI timed out on TD - token=%#x\n", token);
 
 	ret = ehci_disable_async(ctrl);
 	if (ret)
@@ -928,7 +928,7 @@ static int ehci_submit_root(struct usb_device *dev, unsigned long pipe,
 						ctrl->portreset |= 1 << port;
 					}
 				} else {
-					printf("port(%d) reset error\n",
+					blog_info("port(%d) reset error\n",
 					       port - 1);
 				}
 			}
@@ -1147,7 +1147,7 @@ static int ehci_common_init(struct ehci_ctrl *ctrl, uint tweaks)
 	cmd = ehci_readl(&ctrl->hcor->or_usbcmd);
 	mdelay(5);
 	reg = HC_VERSION(ehci_readl(&ctrl->hccr->cr_capbase));
-	printf("USB EHCI %x.%02x\n", reg >> 8, reg & 0xff);
+	blog_info("USB EHCI %x.%02x\n", reg >> 8, reg & 0xff);
 
 	return 0;
 }
@@ -1254,7 +1254,7 @@ enable_periodic(struct ehci_ctrl *ctrl)
 	ret = handshake((uint32_t *)&hcor->or_usbsts,
 			STS_PSS, STS_PSS, 100 * 1000);
 	if (ret < 0) {
-		printf("EHCI failed: timeout when enabling periodic list\n");
+		blog_info("EHCI failed: timeout when enabling periodic list\n");
 		return -ETIMEDOUT;
 	}
 	udelay(1000);
@@ -1275,7 +1275,7 @@ disable_periodic(struct ehci_ctrl *ctrl)
 	ret = handshake((uint32_t *)&hcor->or_usbsts,
 			STS_PSS, 0, 100 * 1000);
 	if (ret < 0) {
-		printf("EHCI failed: timeout when disabling periodic list\n");
+		blog_info("EHCI failed: timeout when disabling periodic list\n");
 		return -ETIMEDOUT;
 	}
 	return 0;
@@ -1301,7 +1301,7 @@ static struct int_queue *_ehci_create_int_queue(struct usb_device *dev,
 	 * not require more than a single qTD.
 	 */
 	if (elementsize > usb_maxpacket(dev, pipe)) {
-		printf("%s: xfers requiring several transactions are not supported.\n",
+		blog_info("%s: xfers requiring several transactions are not supported.\n",
 		       __func__);
 		return NULL;
 	}
@@ -1510,7 +1510,7 @@ static int _ehci_destroy_int_queue(struct usb_device *dev,
 		}
 		cur = NEXT_QH(cur);
 		if (get_timer(0) > timeout) {
-			printf("Timeout destroying interrupt endpoint queue\n");
+			blog_info("Timeout destroying interrupt endpoint queue\n");
 			result = -1;
 			goto out;
 		}
@@ -1549,7 +1549,7 @@ static int _ehci_submit_int_msg(struct usb_device *dev, unsigned long pipe,
 	timeout = get_timer(0) + USB_TIMEOUT_MS(pipe);
 	while ((backbuffer = _ehci_poll_int_queue(dev, queue)) == NULL)
 		if (get_timer(0) > timeout) {
-			printf("Timeout poll on interrupt endpoint\n");
+			blog_info("Timeout poll on interrupt endpoint\n");
 			result = -ETIMEDOUT;
 			break;
 		}

@@ -648,16 +648,16 @@ static int smsc95xx_init_common(struct usb_device *udev, struct ueth_data *dev,
 			& BMSR_LSTATUS;
 		if (!link_detected) {
 			if (timeout == 0)
-				printf("Waiting for Ethernet connection... ");
+				blog_info("Waiting for Ethernet connection... ");
 			udelay(TIMEOUT_RESOLUTION * 1000);
 			timeout += TIMEOUT_RESOLUTION;
 		}
 	} while (!link_detected && timeout < PHY_CONNECT_TIMEOUT);
 	if (link_detected) {
 		if (timeout != 0)
-			printf("done.\n");
+			blog_info("done.\n");
 	} else {
-		printf("unable to connect.\n");
+		blog_info("unable to connect.\n");
 		return -EIO;
 	}
 	return 0;

@@ -33,7 +33,7 @@ static int rk8xx_sysreset_request(struct udevice *dev, enum sysreset_t type)
 				BIT(0));
 		break;
 	default:
-		printf("Unknown PMIC RK%x: Cannot shutdown\n",
+		blog_info("Unknown PMIC RK%x: Cannot shutdown\n",
 		       priv->variant);
 		return -EPROTONOSUPPORT;
 	};
@@ -65,20 +65,20 @@ void rk8xx_off_for_plugin(struct udevice *dev)
 	case RK816_ID:
 	case RK818_ID:
 		if (pmic_reg_read(dev, RK8XX_ON_SOURCE) & RK8XX_ON_PLUG_IN) {
-			printf("Power Off due to plug-in event\n");
+			blog_info("Power Off due to plug-in event\n");
 			pmic_clrsetbits(dev, REG_DEVCTRL, 0, BIT(0));
 		}
 		break;
 	case RK809_ID:
 	case RK817_ID:
 		if (pmic_reg_read(dev, RK817_ON_SOURCE) & RK8XX_ON_PLUG_IN) {
-			printf("Power Off due to plug-in event\n");
+			blog_info("Power Off due to plug-in event\n");
 			pmic_clrsetbits(dev, RK817_REG_SYS_CFG3, 0,
 					BIT(0));
 		}
 		break;
 	default:
-		printf("PMIC RK%x: Cannot read boot reason.\n",
+		blog_info("PMIC RK%x: Cannot read boot reason.\n",
 		       priv->variant);
 	}
 }
@@ -218,7 +218,7 @@ static int rk8xx_probe(struct udevice *dev)
 		pmic_reg_write(dev, RK817_POWER_EN_SAVE1, value);
 		break;
 	default:
-		printf("Unknown PMIC: RK%x!!\n", priv->variant);
+		blog_info("Unknown PMIC: RK%x!!\n", priv->variant);
 		return -EINVAL;
 	}
 
@@ -228,7 +228,7 @@ static int rk8xx_probe(struct udevice *dev)
 				      init_data[i].mask,
 				      init_data[i].val);
 		if (ret < 0) {
-			printf("%s: i2c set reg 0x%x failed, ret=%d\n",
+			blog_info("%s: i2c set reg 0x%x failed, ret=%d\n",
 			       __func__, init_data[i].reg, ret);
 		}
 
@@ -236,13 +236,13 @@ static int rk8xx_probe(struct udevice *dev)
 		      pmic_reg_read(dev, init_data[i].reg));
 	}
 
-	printf("PMIC:  RK%x ", show_variant);
+	blog_info("PMIC:  RK%x \n", show_variant);
 
 	if (on_source && off_source)
-		printf("(on=0x%02x, off=0x%02x)",
+		blog_info("(on=0x%02x, off=0x%02x)\n",
 		       pmic_reg_read(dev, on_source),
 		       pmic_reg_read(dev, off_source));
-	printf("\n");
+	blog_info("\n");
 	if (CONFIG_IS_ENABLED(ROCKCHIP_RK8XX_DISABLE_BOOT_ON_POWERON))
 		rk8xx_off_for_plugin(dev);
 

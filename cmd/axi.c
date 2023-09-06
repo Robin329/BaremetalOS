@@ -34,14 +34,14 @@ static void show_bus(struct udevice *bus)
 {
 	struct udevice *dev;
 
-	printf("Bus %d:\t%s", dev_seq(bus), bus->name);
+	blog_info("Bus %d:\t%s", dev_seq(bus), bus->name);
 	if (device_active(bus))
-		printf("  (active)");
-	printf("\n");
+		blog_info("  (active)");
+	blog_info("\n");
 	for (device_find_first_child(bus, &dev);
 	     dev;
 	     device_find_next_child(&dev))
-		printf("  %s\n", dev->name);
+		blog_info("  %s\n", dev->name);
 }
 
 /**
@@ -128,7 +128,7 @@ static int do_axi_show_bus(struct cmd_tbl *cmdtp, int flag, int argc,
 
 		ret = uclass_get_device_by_seq(UCLASS_AXI, i, &bus);
 		if (ret) {
-			printf("Invalid bus %d: err=%d\n", i, ret);
+			blog_info("Invalid bus %d: err=%d\n", i, ret);
 			return CMD_RET_FAILURE;
 		}
 		show_bus(bus);
@@ -152,14 +152,14 @@ static int do_axi_bus_num(struct cmd_tbl *cmdtp, int flag, int argc,
 		else
 			bus_no = -1;
 
-		printf("Current bus is %d\n", bus_no);
+		blog_info("Current bus is %d\n", bus_no);
 	} else {
 		bus_no = dectoul(argv[1], NULL);
-		printf("Setting bus to %d\n", bus_no);
+		blog_info("Setting bus to %d\n", bus_no);
 
 		ret = axi_set_cur_bus(bus_no);
 		if (ret)
-			printf("Failure changing bus number (%d)\n", ret);
+			blog_info("Failure changing bus number (%d)\n", ret);
 	}
 
 	return ret ? CMD_RET_FAILURE : 0;
@@ -223,7 +223,7 @@ static int do_axi_md(struct cmd_tbl *cmdtp, int flag, int argc,
 		unitsize = 4;
 		break;
 	default:
-		printf("Unknown read size '%lu'\n", size);
+		blog_info("Unknown read size '%lu'\n", size);
 		return CMD_RET_USAGE;
 	};
 
@@ -240,9 +240,9 @@ static int do_axi_md(struct cmd_tbl *cmdtp, int flag, int argc,
 				continue;
 
 			if (ret == -ENOSYS)
-				printf("axi_read failed; read size not supported?\n");
+				blog_info("axi_read failed; read size not supported?\n");
 			else
-				printf("axi_read failed: err = %d\n", ret);
+				blog_info("axi_read failed: err = %d\n", ret);
 
 			return CMD_RET_FAILURE;
 		}
@@ -287,7 +287,7 @@ static int do_axi_mw(struct cmd_tbl *cmdtp, int flag, int argc,
 		axisize = AXI_SIZE_32;
 		break;
 	default:
-		printf("Unknown write size '%lu'\n", size);
+		blog_info("Unknown write size '%lu'\n", size);
 		return CMD_RET_USAGE;
 	};
 
@@ -308,7 +308,7 @@ static int do_axi_mw(struct cmd_tbl *cmdtp, int flag, int argc,
 				    &writeval, axisize);
 
 		if (ret) {
-			printf("axi_write failed: err = %d\n", ret);
+			blog_info("axi_write failed: err = %d\n", ret);
 			return CMD_RET_FAILURE;
 		}
 	}

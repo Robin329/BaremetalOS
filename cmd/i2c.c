@@ -153,7 +153,7 @@ static int i2c_get_cur_bus(struct udevice **busp)
 #ifdef CONFIG_I2C_SET_DEFAULT_BUS_NUM
 	if (!i2c_cur_bus) {
 		if (cmd_i2c_set_bus_num(CONFIG_I2C_DEFAULT_BUS_NUMBER)) {
-			printf("Default I2C bus %d not found\n",
+			blog_info("Default I2C bus %d not found\n",
 			       CONFIG_I2C_DEFAULT_BUS_NUMBER);
 			return -ENODEV;
 		}
@@ -223,7 +223,7 @@ enum i2c_err_op {
 
 static int i2c_report_err(int ret, enum i2c_err_op op)
 {
-	printf("Error %s the chip: %d\n",
+	blog_info("Error %s the chip: %d\n",
 	       op == I2C_ERR_READ ? "reading" : "writing", ret);
 
 	return CMD_RET_FAILURE;
@@ -410,7 +410,7 @@ static int do_i2c_flags(struct cmd_tbl *cmdtp, int flag, int argc,
 	} else  {
 		ret = i2c_get_chip_flags(dev, &flags);
 		if (!ret)
-			printf("%x\n", flags);
+			blog_info("%x\n", flags);
 	}
 	if (ret)
 		return i2c_report_err(ret, I2C_ERR_READ);
@@ -440,7 +440,7 @@ static int do_i2c_olen(struct cmd_tbl *cmdtp, int flag, int argc,
 	} else  {
 		ret = i2c_get_chip_offset_len(dev);
 		if (ret >= 0) {
-			printf("%x\n", ret);
+			blog_info("%x\n", ret);
 			ret = 0;
 		}
 	}
@@ -544,10 +544,10 @@ static int do_i2c_md(struct cmd_tbl *cmdtp, int flag, int argc,
 		if (ret)
 			return i2c_report_err(ret, I2C_ERR_READ);
 		else {
-			printf("%04x:", addr);
+			blog_info("%04x:", addr);
 			cp = linebuf;
 			for (j=0; j<linebytes; j++) {
-				printf(" %02x", *cp++);
+				blog_info(" %02x", *cp++);
 				addr++;
 			}
 			puts ("    ");
@@ -556,7 +556,7 @@ static int do_i2c_md(struct cmd_tbl *cmdtp, int flag, int argc,
 				if ((*cp < 0x20) || (*cp > 0x7e))
 					puts (".");
 				else
-					printf("%c", *cp);
+					blog_info("%c", *cp);
 				cp++;
 			}
 			putc ('\n');
@@ -715,7 +715,7 @@ static int do_i2c_crc(struct cmd_tbl *cmdtp, int flag, int argc,
 	 */
 	count = hextoul(argv[3], NULL);
 
-	printf ("CRC32 for %08lx ... %08lx ==> ", addr, addr + count - 1);
+	blog_info ("CRC32 for %08lx ... %08lx ==> ", addr, addr + count - 1);
 	/*
 	 * CRC a byte at a time.  This is going to be slooow, but hey, the
 	 * memories are small and slow too so hopefully nobody notices.
@@ -736,7 +736,7 @@ static int do_i2c_crc(struct cmd_tbl *cmdtp, int flag, int argc,
 	if (err > 0)
 		i2c_report_err(ret, I2C_ERR_READ);
 	else
-		printf ("%08lx\n", crc);
+		blog_info ("%08lx\n", crc);
 
 	return 0;
 }
@@ -817,7 +817,7 @@ static int mod_i2c_mem(struct cmd_tbl *cmdtp, int incrflag, int flag, int argc,
 	 * the next value.  A non-converted value exits.
 	 */
 	do {
-		printf("%08lx:", addr);
+		blog_info("%08lx:", addr);
 #if CONFIG_IS_ENABLED(DM_I2C)
 		ret = dm_i2c_read(dev, addr, (uchar *)&data, size);
 #else
@@ -828,11 +828,11 @@ static int mod_i2c_mem(struct cmd_tbl *cmdtp, int incrflag, int flag, int argc,
 
 		data = cpu_to_be32(data);
 		if (size == 1)
-			printf(" %02lx", (data >> 24) & 0x000000FF);
+			blog_info(" %02lx", (data >> 24) & 0x000000FF);
 		else if (size == 2)
-			printf(" %04lx", (data >> 16) & 0x0000FFFF);
+			blog_info(" %04lx", (data >> 16) & 0x0000FFFF);
 		else
-			printf(" %08lx", data);
+			blog_info(" %08lx", data);
 
 		nbytes = cli_readline(" ? ");
 		if (nbytes == 0) {
@@ -949,7 +949,7 @@ static int do_i2c_probe(struct cmd_tbl *cmdtp, int flag, int argc,
 		ret = i2c_probe(j);
 #endif
 		if (ret == 0) {
-			printf(" %02X", j);
+			blog_info(" %02X", j);
 			found++;
 		}
 	}
@@ -959,7 +959,7 @@ static int do_i2c_probe(struct cmd_tbl *cmdtp, int flag, int argc,
 	puts ("Excluded chip addresses:");
 	for (k = 0; k < ARRAY_SIZE(i2c_no_probes); k++) {
 		if (COMPARE_BUS(bus,k))
-			printf(" %02X", NO_PROBE_ADDR(k));
+			blog_info(" %02X", NO_PROBE_ADDR(k));
 	}
 	putc ('\n');
 #endif
@@ -1060,7 +1060,7 @@ static int do_i2c_loop(struct cmd_tbl *cmdtp, int flag, int argc,
 #if defined(CONFIG_CMD_SDRAM)
 static void print_ddr2_tcyc (u_char const b)
 {
-	printf ("%d.", (b >> 4) & 0x0F);
+	blog_info ("%d.", (b >> 4) & 0x0F);
 	switch (b & 0x0F) {
 	case 0x0:
 	case 0x1:
@@ -1072,7 +1072,7 @@ static void print_ddr2_tcyc (u_char const b)
 	case 0x7:
 	case 0x8:
 	case 0x9:
-		printf ("%d ns\n", b & 0x0F);
+		blog_info ("%d ns\n", b & 0x0F);
 		break;
 	case 0xA:
 		puts ("25 ns\n");
@@ -1191,13 +1191,13 @@ static int do_sdram(struct cmd_tbl *cmdtp, int flag, int argc,
 		cksum += data[j];
 	}
 	if (cksum != data[63]) {
-		printf ("WARNING: Configuration data checksum failure:\n"
+		blog_info ("WARNING: Configuration data checksum failure:\n"
 			"  is 0x%02x, calculated 0x%02x\n", data[63], cksum);
 	}
-	printf ("SPD data revision            %d.%d\n",
+	blog_info ("SPD data revision            %d.%d\n",
 		(data[62] >> 4) & 0x0F, data[62] & 0x0F);
-	printf ("Bytes used                   0x%02X\n", data[0]);
-	printf ("Serial memory size           0x%02X\n", 1 << data[1]);
+	blog_info ("Bytes used                   0x%02X\n", data[0]);
+	blog_info ("Serial memory size           0x%02X\n", 1 << data[1]);
 
 	puts ("Memory type                  ");
 	switch (data[2]) {
@@ -1233,32 +1233,32 @@ static int do_sdram(struct cmd_tbl *cmdtp, int flag, int argc,
 
 	puts ("Row address bits             ");
 	if ((data[3] & 0x00F0) == 0)
-		printf ("%d\n", data[3] & 0x0F);
+		blog_info ("%d\n", data[3] & 0x0F);
 	else
-		printf ("%d/%d\n", data[3] & 0x0F, (data[3] >> 4) & 0x0F);
+		blog_info ("%d/%d\n", data[3] & 0x0F, (data[3] >> 4) & 0x0F);
 
 	puts ("Column address bits          ");
 	if ((data[4] & 0x00F0) == 0)
-		printf ("%d\n", data[4] & 0x0F);
+		blog_info ("%d\n", data[4] & 0x0F);
 	else
-		printf ("%d/%d\n", data[4] & 0x0F, (data[4] >> 4) & 0x0F);
+		blog_info ("%d/%d\n", data[4] & 0x0F, (data[4] >> 4) & 0x0F);
 
 	switch (type) {
 	case DDR2:
-		printf ("Number of ranks              %d\n",
+		blog_info ("Number of ranks              %d\n",
 			(data[5] & 0x07) + 1);
 		break;
 	default:
-		printf ("Module rows                  %d\n", data[5]);
+		blog_info ("Module rows                  %d\n", data[5]);
 		break;
 	}
 
 	switch (type) {
 	case DDR2:
-		printf ("Module data width            %d bits\n", data[6]);
+		blog_info ("Module data width            %d bits\n", data[6]);
 		break;
 	default:
-		printf ("Module data width            %d bits\n",
+		blog_info ("Module data width            %d bits\n",
 			(data[7] << 8) | data[6]);
 		break;
 	}
@@ -1276,22 +1276,22 @@ static int do_sdram(struct cmd_tbl *cmdtp, int flag, int argc,
 
 	switch (type) {
 	case DDR2:
-		printf ("SDRAM cycle time             ");
+		blog_info ("SDRAM cycle time             ");
 		print_ddr2_tcyc (data[9]);
 		break;
 	default:
-		printf ("SDRAM cycle time             %d.%d ns\n",
+		blog_info ("SDRAM cycle time             %d.%d ns\n",
 			(data[9] >> 4) & 0x0F, data[9] & 0x0F);
 		break;
 	}
 
 	switch (type) {
 	case DDR2:
-		printf ("SDRAM access time            0.%d%d ns\n",
+		blog_info ("SDRAM access time            0.%d%d ns\n",
 			(data[10] >> 4) & 0x0F, data[10] & 0x0F);
 		break;
 	default:
-		printf ("SDRAM access time            %d.%d ns\n",
+		blog_info ("SDRAM access time            %d.%d ns\n",
 			(data[10] >> 4) & 0x0F, data[10] & 0x0F);
 		break;
 	}
@@ -1321,12 +1321,12 @@ static int do_sdram(struct cmd_tbl *cmdtp, int flag, int argc,
 
 	switch (type) {
 	case DDR2:
-		printf ("SDRAM width (primary)        %d\n", data[13]);
+		blog_info ("SDRAM width (primary)        %d\n", data[13]);
 		break;
 	default:
-		printf ("SDRAM width (primary)        %d\n", data[13] & 0x7F);
+		blog_info ("SDRAM width (primary)        %d\n", data[13] & 0x7F);
 		if ((data[13] & 0x80) != 0) {
-			printf ("  (second bank)              %d\n",
+			blog_info ("  (second bank)              %d\n",
 				2 * (data[13] & 0x7F));
 		}
 		break;
@@ -1335,15 +1335,15 @@ static int do_sdram(struct cmd_tbl *cmdtp, int flag, int argc,
 	switch (type) {
 	case DDR2:
 		if (data[14] != 0)
-			printf ("EDC width                    %d\n", data[14]);
+			blog_info ("EDC width                    %d\n", data[14]);
 		break;
 	default:
 		if (data[14] != 0) {
-			printf ("EDC width                    %d\n",
+			blog_info ("EDC width                    %d\n",
 				data[14] & 0x7F);
 
 			if ((data[14] & 0x80) != 0) {
-				printf ("  (second bank)              %d\n",
+				blog_info ("  (second bank)              %d\n",
 					2 * (data[14] & 0x7F));
 			}
 		}
@@ -1351,7 +1351,7 @@ static int do_sdram(struct cmd_tbl *cmdtp, int flag, int argc,
 	}
 
 	if (DDR2 != type) {
-		printf ("Min clock delay, back-to-back random column addresses "
+		blog_info ("Min clock delay, back-to-back random column addresses "
 			"%d\n", data[15]);
 	}
 
@@ -1362,7 +1362,7 @@ static int do_sdram(struct cmd_tbl *cmdtp, int flag, int argc,
 	if (data[16] & 0x02) puts (" 2");
 	if (data[16] & 0x01) puts (" 1");
 	putc ('\n');
-	printf ("Number of banks              %d\n", data[17]);
+	blog_info ("Number of banks              %d\n", data[17]);
 
 	switch (type) {
 	case DDR2:
@@ -1400,9 +1400,9 @@ static int do_sdram(struct cmd_tbl *cmdtp, int flag, int argc,
 			puts ("  TBD (bit 5)\n");
 		if (data[21] & 0x10)
 			puts ("  FET switch external enable\n");
-		printf ("  %d PLLs on DIMM\n", (data[21] >> 2) & 0x03);
+		blog_info ("  %d PLLs on DIMM\n", (data[21] >> 2) & 0x03);
 		if (data[20] & 0x11) {
-			printf ("  %d active registers on DIMM\n",
+			blog_info ("  %d active registers on DIMM\n",
 				(data[21] & 0x03) + 1);
 		}
 		break;
@@ -1436,79 +1436,79 @@ static int do_sdram(struct cmd_tbl *cmdtp, int flag, int argc,
 
 	switch (type) {
 	case DDR2:
-		printf ("SDRAM cycle time (2nd highest CAS latency)        ");
+		blog_info ("SDRAM cycle time (2nd highest CAS latency)        ");
 		print_ddr2_tcyc (data[23]);
 		break;
 	default:
-		printf ("SDRAM cycle time (2nd highest CAS latency)        %d."
+		blog_info ("SDRAM cycle time (2nd highest CAS latency)        %d."
 			"%d ns\n", (data[23] >> 4) & 0x0F, data[23] & 0x0F);
 		break;
 	}
 
 	switch (type) {
 	case DDR2:
-		printf ("SDRAM access from clock (2nd highest CAS latency) 0."
+		blog_info ("SDRAM access from clock (2nd highest CAS latency) 0."
 			"%d%d ns\n", (data[24] >> 4) & 0x0F, data[24] & 0x0F);
 		break;
 	default:
-		printf ("SDRAM access from clock (2nd highest CAS latency) %d."
+		blog_info ("SDRAM access from clock (2nd highest CAS latency) %d."
 			"%d ns\n", (data[24] >> 4) & 0x0F, data[24] & 0x0F);
 		break;
 	}
 
 	switch (type) {
 	case DDR2:
-		printf ("SDRAM cycle time (3rd highest CAS latency)        ");
+		blog_info ("SDRAM cycle time (3rd highest CAS latency)        ");
 		print_ddr2_tcyc (data[25]);
 		break;
 	default:
-		printf ("SDRAM cycle time (3rd highest CAS latency)        %d."
+		blog_info ("SDRAM cycle time (3rd highest CAS latency)        %d."
 			"%d ns\n", (data[25] >> 4) & 0x0F, data[25] & 0x0F);
 		break;
 	}
 
 	switch (type) {
 	case DDR2:
-		printf ("SDRAM access from clock (3rd highest CAS latency) 0."
+		blog_info ("SDRAM access from clock (3rd highest CAS latency) 0."
 			"%d%d ns\n", (data[26] >> 4) & 0x0F, data[26] & 0x0F);
 		break;
 	default:
-		printf ("SDRAM access from clock (3rd highest CAS latency) %d."
+		blog_info ("SDRAM access from clock (3rd highest CAS latency) %d."
 			"%d ns\n", (data[26] >> 4) & 0x0F, data[26] & 0x0F);
 		break;
 	}
 
 	switch (type) {
 	case DDR2:
-		printf ("Minimum row precharge        %d.%02d ns\n",
+		blog_info ("Minimum row precharge        %d.%02d ns\n",
 			(data[27] >> 2) & 0x3F, 25 * (data[27] & 0x03));
 		break;
 	default:
-		printf ("Minimum row precharge        %d ns\n", data[27]);
+		blog_info ("Minimum row precharge        %d ns\n", data[27]);
 		break;
 	}
 
 	switch (type) {
 	case DDR2:
-		printf ("Row active to row active min %d.%02d ns\n",
+		blog_info ("Row active to row active min %d.%02d ns\n",
 			(data[28] >> 2) & 0x3F, 25 * (data[28] & 0x03));
 		break;
 	default:
-		printf ("Row active to row active min %d ns\n", data[28]);
+		blog_info ("Row active to row active min %d ns\n", data[28]);
 		break;
 	}
 
 	switch (type) {
 	case DDR2:
-		printf ("RAS to CAS delay min         %d.%02d ns\n",
+		blog_info ("RAS to CAS delay min         %d.%02d ns\n",
 			(data[29] >> 2) & 0x3F, 25 * (data[29] & 0x03));
 		break;
 	default:
-		printf ("RAS to CAS delay min         %d ns\n", data[29]);
+		blog_info ("RAS to CAS delay min         %d ns\n", data[29]);
 		break;
 	}
 
-	printf ("Minimum RAS pulse width      %d ns\n", data[30]);
+	blog_info ("Minimum RAS pulse width      %d ns\n", data[30]);
 
 	switch (type) {
 	case DDR2:
@@ -1527,15 +1527,15 @@ static int do_sdram(struct cmd_tbl *cmdtp, int flag, int argc,
 	case DDR2:
 		puts ("Command and Address setup    ");
 		if (data[32] >= 0xA0) {
-			printf ("1.%d%d ns\n",
+			blog_info ("1.%d%d ns\n",
 				((data[32] >> 4) & 0x0F) - 10, data[32] & 0x0F);
 		} else {
-			printf ("0.%d%d ns\n",
+			blog_info ("0.%d%d ns\n",
 				((data[32] >> 4) & 0x0F), data[32] & 0x0F);
 		}
 		break;
 	default:
-		printf ("Command and Address setup    %c%d.%d ns\n",
+		blog_info ("Command and Address setup    %c%d.%d ns\n",
 			(data[32] & 0x80) ? '-' : '+',
 			(data[32] >> 4) & 0x07, data[32] & 0x0F);
 		break;
@@ -1545,15 +1545,15 @@ static int do_sdram(struct cmd_tbl *cmdtp, int flag, int argc,
 	case DDR2:
 		puts ("Command and Address hold     ");
 		if (data[33] >= 0xA0) {
-			printf ("1.%d%d ns\n",
+			blog_info ("1.%d%d ns\n",
 				((data[33] >> 4) & 0x0F) - 10, data[33] & 0x0F);
 		} else {
-			printf ("0.%d%d ns\n",
+			blog_info ("0.%d%d ns\n",
 				((data[33] >> 4) & 0x0F), data[33] & 0x0F);
 		}
 		break;
 	default:
-		printf ("Command and Address hold     %c%d.%d ns\n",
+		blog_info ("Command and Address hold     %c%d.%d ns\n",
 			(data[33] & 0x80) ? '-' : '+',
 			(data[33] >> 4) & 0x07, data[33] & 0x0F);
 		break;
@@ -1561,11 +1561,11 @@ static int do_sdram(struct cmd_tbl *cmdtp, int flag, int argc,
 
 	switch (type) {
 	case DDR2:
-		printf ("Data signal input setup      0.%d%d ns\n",
+		blog_info ("Data signal input setup      0.%d%d ns\n",
 			(data[34] >> 4) & 0x0F, data[34] & 0x0F);
 		break;
 	default:
-		printf ("Data signal input setup      %c%d.%d ns\n",
+		blog_info ("Data signal input setup      %c%d.%d ns\n",
 			(data[34] & 0x80) ? '-' : '+',
 			(data[34] >> 4) & 0x07, data[34] & 0x0F);
 		break;
@@ -1573,11 +1573,11 @@ static int do_sdram(struct cmd_tbl *cmdtp, int flag, int argc,
 
 	switch (type) {
 	case DDR2:
-		printf ("Data signal input hold       0.%d%d ns\n",
+		blog_info ("Data signal input hold       0.%d%d ns\n",
 			(data[35] >> 4) & 0x0F, data[35] & 0x0F);
 		break;
 	default:
-		printf ("Data signal input hold       %c%d.%d ns\n",
+		blog_info ("Data signal input hold       %c%d.%d ns\n",
 			(data[35] & 0x80) ? '-' : '+',
 			(data[35] >> 4) & 0x07, data[35] & 0x0F);
 		break;
@@ -1585,22 +1585,22 @@ static int do_sdram(struct cmd_tbl *cmdtp, int flag, int argc,
 
 	puts ("Manufacturer's JEDEC ID      ");
 	for (j = 64; j <= 71; j++)
-		printf ("%02X ", data[j]);
+		blog_info ("%02X ", data[j]);
 	putc ('\n');
-	printf ("Manufacturing Location       %02X\n", data[72]);
+	blog_info ("Manufacturing Location       %02X\n", data[72]);
 	puts ("Manufacturer's Part Number   ");
 	for (j = 73; j <= 90; j++)
-		printf ("%02X ", data[j]);
+		blog_info ("%02X ", data[j]);
 	putc ('\n');
-	printf ("Revision Code                %02X %02X\n", data[91], data[92]);
-	printf ("Manufacturing Date           %02X %02X\n", data[93], data[94]);
+	blog_info ("Revision Code                %02X %02X\n", data[91], data[92]);
+	blog_info ("Manufacturing Date           %02X %02X\n", data[93], data[94]);
 	puts ("Assembly Serial Number       ");
 	for (j = 95; j <= 98; j++)
-		printf ("%02X ", data[j]);
+		blog_info ("%02X ", data[j]);
 	putc ('\n');
 
 	if (DDR2 != type) {
-		printf ("Speed rating                 PC%d\n",
+		blog_info ("Speed rating                 PC%d\n",
 			data[126] == 0x66 ? 66 : data[126]);
 	}
 	return 0;
@@ -1653,16 +1653,16 @@ static void show_bus(struct udevice *bus)
 {
 	struct udevice *dev;
 
-	printf("Bus %d:\t%s", dev_seq(bus), bus->name);
+	blog_info("Bus %d:\t%s", dev_seq(bus), bus->name);
 	if (device_active(bus))
-		printf("  (active %d)", dev_seq(bus));
-	printf("\n");
+		blog_info("  (active %d)", dev_seq(bus));
+	blog_info("\n");
 	for (device_find_first_child(bus, &dev);
 	     dev;
 	     device_find_next_child(&dev)) {
 		struct dm_i2c_chip *chip = dev_get_parent_plat(dev);
 
-		printf("   %02x: %s, offset len %x, flags %x\n",
+		blog_info("   %02x: %s, offset len %x, flags %x\n",
 		       chip->chip_addr, dev->name, chip->offset_len,
 		       chip->flags);
 	}
@@ -1698,20 +1698,20 @@ static int do_i2c_show_bus(struct cmd_tbl *cmdtp, int flag, int argc,
 		int i;
 
 		for (i = 0; i < CFG_SYS_NUM_I2C_BUSES; i++) {
-			printf("Bus %d:\t%s", i, I2C_ADAP_NR(i)->name);
+			blog_info("Bus %d:\t%s", i, I2C_ADAP_NR(i)->name);
 #ifndef CFG_SYS_I2C_DIRECT_BUS
 			int j;
 
 			for (j = 0; j < CFG_SYS_I2C_MAX_HOPS; j++) {
 				if (i2c_bus[i].next_hop[j].chip == 0)
 					break;
-				printf("->%s@0x%2x:%d",
+				blog_info("->%s@0x%2x:%d",
 				       i2c_bus[i].next_hop[j].mux.name,
 				       i2c_bus[i].next_hop[j].chip,
 				       i2c_bus[i].next_hop[j].channel);
 			}
 #endif
-			printf("\n");
+			blog_info("\n");
 		}
 #endif
 	} else {
@@ -1725,28 +1725,28 @@ static int do_i2c_show_bus(struct cmd_tbl *cmdtp, int flag, int argc,
 
 		ret = uclass_get_device_by_seq(UCLASS_I2C, i, &bus);
 		if (ret) {
-			printf("Invalid bus %d: err=%d\n", i, ret);
+			blog_info("Invalid bus %d: err=%d\n", i, ret);
 			return CMD_RET_FAILURE;
 		}
 		show_bus(bus);
 #else
 		if (i >= CFG_SYS_NUM_I2C_BUSES) {
-			printf("Invalid bus %d\n", i);
+			blog_info("Invalid bus %d\n", i);
 			return -1;
 		}
-		printf("Bus %d:\t%s", i, I2C_ADAP_NR(i)->name);
+		blog_info("Bus %d:\t%s", i, I2C_ADAP_NR(i)->name);
 #ifndef CFG_SYS_I2C_DIRECT_BUS
 			int j;
 			for (j = 0; j < CFG_SYS_I2C_MAX_HOPS; j++) {
 				if (i2c_bus[i].next_hop[j].chip == 0)
 					break;
-				printf("->%s@0x%2x:%d",
+				blog_info("->%s@0x%2x:%d",
 				       i2c_bus[i].next_hop[j].mux.name,
 				       i2c_bus[i].next_hop[j].chip,
 				       i2c_bus[i].next_hop[j].channel);
 			}
 #endif
-		printf("\n");
+		blog_info("\n");
 #endif
 	}
 
@@ -1783,23 +1783,23 @@ static int do_i2c_bus_num(struct cmd_tbl *cmdtp, int flag, int argc,
 #else
 		bus_no = i2c_get_bus_num();
 #endif
-		printf("Current bus is %d\n", bus_no);
+		blog_info("Current bus is %d\n", bus_no);
 	} else {
 		bus_no = dectoul(argv[1], NULL);
 #if CONFIG_IS_ENABLED(SYS_I2C_LEGACY)
 		if (bus_no >= CFG_SYS_NUM_I2C_BUSES) {
-			printf("Invalid bus %d\n", bus_no);
+			blog_info("Invalid bus %d\n", bus_no);
 			return -1;
 		}
 #endif
-		printf("Setting bus to %d\n", bus_no);
+		blog_info("Setting bus to %d\n", bus_no);
 #if CONFIG_IS_ENABLED(DM_I2C)
 		ret = cmd_i2c_set_bus_num(bus_no);
 #else
 		ret = i2c_set_bus_num(bus_no);
 #endif
 		if (ret)
-			printf("Failure changing bus number (%d)\n", ret);
+			blog_info("Failure changing bus number (%d)\n", ret);
 	}
 
 	return ret ? CMD_RET_FAILURE : 0;
@@ -1834,17 +1834,17 @@ static int do_i2c_bus_speed(struct cmd_tbl *cmdtp, int flag, int argc,
 		speed = i2c_get_bus_speed();
 #endif
 		/* querying current speed */
-		printf("Current bus speed=%d\n", speed);
+		blog_info("Current bus speed=%d\n", speed);
 	} else {
 		speed = dectoul(argv[1], NULL);
-		printf("Setting bus speed to %d Hz\n", speed);
+		blog_info("Setting bus speed to %d Hz\n", speed);
 #if CONFIG_IS_ENABLED(DM_I2C)
 		ret = dm_i2c_set_bus_speed(bus, speed);
 #else
 		ret = i2c_set_bus_speed(speed);
 #endif
 		if (ret)
-			printf("Failure changing bus speed (%d)\n", ret);
+			blog_info("Failure changing bus speed (%d)\n", ret);
 	}
 
 	return ret ? CMD_RET_FAILURE : 0;
@@ -1900,7 +1900,7 @@ static int do_i2c_reset(struct cmd_tbl *cmdtp, int flag, int argc,
 	if (i2c_get_cur_bus(&bus))
 		return CMD_RET_FAILURE;
 	if (i2c_deblock(bus)) {
-		printf("Error: Not supported by the driver\n");
+		blog_info("Error: Not supported by the driver\n");
 		return CMD_RET_FAILURE;
 	}
 #elif CONFIG_IS_ENABLED(SYS_I2C_LEGACY)

@@ -392,7 +392,7 @@ void print_mmc_devices(char separator)
 			printf(" (%s)", mmc_type);
 	}
 
-	printf("\n");
+	blog_info("\n");
 }
 
 #else

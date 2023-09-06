@@ -24,8 +24,7 @@
 #include <dt-bindings/clock/rk3399-cru.h>
 #include <linux/bitops.h>
 #include <linux/delay.h>
-#undef debug
-#define debug printf
+
 DECLARE_GLOBAL_DATA_PTR;
 
 #if CONFIG_IS_ENABLED(OF_PLATDATA)
@@ -329,7 +328,7 @@ static void rkclk_set_pll(u32 *pll_con, const struct pll_div *div)
 	u32 vco_khz = OSC_HZ / 1000 * div->fbdiv / div->refdiv;
 	u32 output_khz = vco_khz / div->postdiv1 / div->postdiv2;
 
-	debug("PLL at %p: fbdiv=%d, refdiv=%d, postdiv1=%d, "
+	blog_dbg("PLL at %p: fbdiv=%d, refdiv=%d, postdiv1=%d, "
 			   "postdiv2=%d, vco=%u khz, output=%u khz\n",
 			   pll_con, div->fbdiv, div->refdiv, div->postdiv1,
 			   div->postdiv2, vco_khz, output_khz);
@@ -1083,7 +1082,7 @@ static int __maybe_unused rk3399_gmac_set_parent(struct clk *clk,
 	 * the id is SCLK_MAC ("clk_gmac"), switch to the internal clock.
 	 */
 	if (parent->dev == clk->dev && parent->id == SCLK_MAC) {
-		debug("%s: switching RGMII to SCLK_MAC\n", __func__);
+		blog_dbg("%s: switching RGMII to SCLK_MAC\n", __func__);
 		rk_clrreg(&priv->cru->clksel_con[19], BIT(4));
 		return 0;
 	}
@@ -1099,7 +1098,7 @@ static int __maybe_unused rk3399_gmac_set_parent(struct clk *clk,
 
 	/* If this is "clkin_gmac", switch to the external clock input */
 	if (!strcmp(clock_output_name, "clkin_gmac")) {
-		debug("%s: switching RGMII to CLKIN\n", __func__);
+		blog_dbg("%s: switching RGMII to CLKIN\n", __func__);
 		rk_setreg(&priv->cru->clksel_con[19], BIT(4));
 		return 0;
 	}
@@ -1115,7 +1114,7 @@ static int __maybe_unused rk3399_clk_set_parent(struct clk *clk,
 		return rk3399_gmac_set_parent(clk, parent);
 	}
 
-	debug("%s: unsupported clk %ld\n", __func__, clk->id);
+	blog_dbg("%s: unsupported clk %ld\n", __func__, clk->id);
 	return -ENOENT;
 }
 
@@ -1206,7 +1205,7 @@ static int rk3399_clk_enable(struct clk *clk)
 		rk_clrreg(&priv->cru->clksel_con[18], BIT(10));
 		break;
 	default:
-		debug("%s: unsupported clk %ld\n", __func__, clk->id);
+		blog_dbg("%s: unsupported clk %ld\n", __func__, clk->id);
 		return -ENOENT;
 	}
 
@@ -1300,7 +1299,7 @@ static int rk3399_clk_disable(struct clk *clk)
 		rk_clrreg(&priv->cru->clksel_con[18], BIT(10));
 		break;
 	default:
-		debug("%s: unsupported clk %ld\n", __func__, clk->id);
+		blog_dbg("%s: unsupported clk %ld\n", __func__, clk->id);
 		return -ENOENT;
 	}
 
@@ -1442,7 +1441,7 @@ static int rk3399_clk_bind(struct udevice *dev)
 	ret = device_bind_driver(dev, "rockchip_sysreset", "sysreset",
 				 &sys_child);
 	if (ret) {
-		debug("Warning: No sysreset driver: ret=%d\n", ret);
+		blog_dbg("Warning: No sysreset driver: ret=%d\n", ret);
 	} else {
 		priv = malloc(sizeof(struct sysreset_reg));
 		priv->glb_srst_fst_value = offsetof(struct rockchip_cru,
@@ -1456,7 +1455,7 @@ static int rk3399_clk_bind(struct udevice *dev)
 	ret = offsetof(struct rockchip_cru, softrst_con[0]);
 	ret = rockchip_reset_bind(dev, ret, 21);
 	if (ret)
-		debug("Warning: software reset driver bind failed\n");
+		blog_dbg("Warning: software reset driver bind failed\n");
 #endif
 
 	return 0;
@@ -1654,7 +1653,7 @@ static int rk3399_pmuclk_bind(struct udevice *dev)
 	ret = offsetof(struct rk3399_pmucru, pmucru_softrst_con[0]);
 	ret = rockchip_reset_bind(dev, ret, 2);
 	if (ret)
-		debug("Warning: software reset driver bind failed\n");
+		blog_dbg("Warning: software reset driver bind failed\n");
 #endif
 
 	return 0;

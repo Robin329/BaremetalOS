@@ -479,7 +479,7 @@ union xhci_trb *xhci_wait_for_event(struct xhci_ctrl *ctrl, trb_type expected)
 				le32_to_cpu(event->generic.field[2])) !=
 								COMP_SUCCESS);
 		else
-			printf("Unexpected XHCI event TRB, skipping... "
+			blog_info("Unexpected XHCI event TRB, skipping... "
 				"(%08x %08x %08x %08x)\n",
 				le32_to_cpu(event->generic.field[0]),
 				le32_to_cpu(event->generic.field[1]),
@@ -492,7 +492,7 @@ union xhci_trb *xhci_wait_for_event(struct xhci_ctrl *ctrl, trb_type expected)
 	if (expected == TRB_TRANSFER)
 		return NULL;
 
-	printf("XHCI timeout on event type %d... cannot recover.\n", expected);
+	blog_info("XHCI timeout on event type %d... cannot recover.\n", expected);
 	BUG();
 }
 
@@ -508,7 +508,7 @@ static void reset_ep(struct usb_device *udev, int ep_index)
 	u64 addr;
 	u32 field;
 
-	printf("Resetting EP %d...\n", ep_index);
+	blog_info("Resetting EP %d...\n", ep_index);
 	xhci_queue_command(ctrl, 0, udev->slot_id, ep_index, TRB_RESET_EP);
 	event = xhci_wait_for_event(ctrl, TRB_COMPLETION);
 	field = le32_to_cpu(event->trans_event.flags);

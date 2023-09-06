@@ -472,7 +472,7 @@ int xhci_alloc_virt_device(struct xhci_ctrl *ctrl, unsigned int slot_id)
 
 	/* Slot ID 0 is reserved */
 	if (ctrl->devs[slot_id]) {
-		printf("Virt dev for slot[%d] already allocated\n", slot_id);
+		blog_info("Virt dev for slot[%d] already allocated\n", slot_id);
 		return -EEXIST;
 	}
 

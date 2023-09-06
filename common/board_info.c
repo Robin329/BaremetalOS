@@ -49,7 +49,7 @@ int __weak show_board_info(void)
 			model = str;
 
 		if (model)
-			printf("Model: %s\n", model);
+			blog_info("Model: %s\n", model);
 	}
 
 	return checkboard();

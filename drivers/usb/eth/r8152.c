@@ -1376,7 +1376,7 @@ static int rtl_ops_init(struct r8152 *tp)
 
 	default:
 		ret = -ENODEV;
-		printf("r8152 Unknown Device\n");
+		blog_info("r8152 Unknown Device\n");
 		break;
 	}
 
@@ -1397,7 +1397,7 @@ static int r8152_init_common(struct r8152 *tp)
 		link_detected = speed & LINK_STATUS;
 		if (!link_detected) {
 			if (timeout == 0)
-				printf("Waiting for Ethernet connection... ");
+				blog_info("Waiting for Ethernet connection... ");
 			mdelay(TIMEOUT_RESOLUTION);
 			timeout += TIMEOUT_RESOLUTION;
 		}
@@ -1406,9 +1406,9 @@ static int r8152_init_common(struct r8152 *tp)
 		tp->rtl_ops.enable(tp);
 
 		if (timeout != 0)
-			printf("done.\n");
+			blog_info("done.\n");
 	} else {
-		printf("unable to connect.\n");
+		blog_info("unable to connect.\n");
 	}
 
 	return 0;

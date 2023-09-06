@@ -371,7 +371,7 @@ static int asix_wait_link(struct ueth_data *dev)
 		link_detected = *tmp16 & BMSR_LSTATUS;
 		if (!link_detected) {
 			if (timeout == 0)
-				printf("Waiting for Ethernet connection... ");
+				blog_info("Waiting for Ethernet connection... ");
 			mdelay(TIMEOUT_RESOLUTION);
 			timeout += TIMEOUT_RESOLUTION;
 		}
@@ -379,10 +379,10 @@ static int asix_wait_link(struct ueth_data *dev)
 
 	if (link_detected) {
 		if (timeout > 0)
-			printf("done.\n");
+			blog_info("done.\n");
 		return 0;
 	} else {
-		printf("unable to connect.\n");
+		blog_info("unable to connect.\n");
 		return -ENETUNREACH;
 	}
 }
@@ -406,7 +406,7 @@ static int asix_init_common(struct ueth_data *dev,
 
 	if (asix_wait_link(dev) != 0) {
 		/*reset device and try again*/
-		printf("Reset Ethernet Device\n");
+		blog_info("Reset Ethernet Device\n");
 		asix_basic_reset(dev, dev_priv);
 		if (asix_wait_link(dev) != 0)
 			goto out_err;

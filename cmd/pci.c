@@ -53,7 +53,7 @@ static void pci_show_regs(struct udevice *dev, struct pci_reg_info *regs)
 		unsigned long val;
 
 		dm_pci_read_config(dev, regs->offset, &val, regs->size);
-		printf("  %s =%*s%#.*lx\n", regs->name,
+		blog_info("  %s =%*s%#.*lx\n", regs->name,
 		       (int)(28 - strlen(regs->name)), "",
 		       pci_field_width(regs->size), val);
 	}
@@ -74,18 +74,18 @@ static int pci_bar_show(struct udevice *dev)
 	header_type &= 0x7f;
 
 	if (header_type == PCI_HEADER_TYPE_CARDBUS) {
-		printf("CardBus doesn't support BARs\n");
+		blog_info("CardBus doesn't support BARs\n");
 		return -ENOSYS;
 	} else if (header_type != PCI_HEADER_TYPE_NORMAL &&
 		   header_type != PCI_HEADER_TYPE_BRIDGE) {
-		printf("unknown header type\n");
+		blog_info("unknown header type\n");
 		return -ENOSYS;
 	}
 
 	bar_cnt = (header_type == PCI_HEADER_TYPE_NORMAL) ? 6 : 2;
 
-	printf("ID   Base                Size                Width  Type\n");
-	printf("----------------------------------------------------------\n");
+	blog_info("ID   Base                Size                Width  Type\n");
+	blog_info("----------------------------------------------------------\n");
 
 	bar_id = 0;
 	reg_addr = PCI_BASE_ADDRESS_0;
@@ -120,7 +120,7 @@ static int pci_bar_show(struct udevice *dev)
 
 		if ((!is_64 && size_low) || (is_64 && size)) {
 			size = ~size + 1;
-			printf(" %d   %#018llx  %#018llx  %d     %s   %s\n",
+			blog_info(" %d   %#018llx  %#018llx  %d     %s   %s\n",
 			       bar_id, (unsigned long long)base,
 			       (unsigned long long)size, is_64 ? 64 : 32,
 			       is_io ? "I/O" : "MEM",
@@ -235,7 +235,7 @@ static void pci_header_show(struct udevice *dev)
 	dm_pci_read_config(dev, PCI_CLASS_CODE, &class, PCI_SIZE_8);
 	dm_pci_read_config(dev, PCI_HEADER_TYPE, &header_type, PCI_SIZE_8);
 	pci_show_regs(dev, regs_start);
-	printf("  class code =                  0x%.2x (%s)\n", (int)class,
+	blog_info("  class code =                  0x%.2x (%s)\n", (int)class,
 	       pci_class_str(class));
 	pci_show_regs(dev, regs_rest);
 
@@ -251,7 +251,7 @@ static void pci_header_show(struct udevice *dev)
 		break;
 
 	default:
-		printf("unknown header\n");
+		blog_info("unknown header\n");
 		break;
     }
 }
@@ -259,8 +259,8 @@ static void pci_header_show(struct udevice *dev)
 static void pciinfo_header(bool short_listing)
 {
 	if (short_listing) {
-		printf("BusDevFun  VendorId   DeviceId   Device Class       Sub-Class\n");
-		printf("_____________________________________________________________\n");
+		blog_info("BusDevFun  VendorId   DeviceId   Device Class       Sub-Class\n");
+		blog_info("_____________________________________________________________\n");
 	}
 }
 
@@ -281,7 +281,7 @@ static void pci_header_show_brief(struct udevice *dev)
 	dm_pci_read_config(dev, PCI_CLASS_CODE, &class, PCI_SIZE_8);
 	dm_pci_read_config(dev, PCI_CLASS_SUB_CODE, &subclass, PCI_SIZE_8);
 
-	printf("0x%.4lx     0x%.4lx     %-23s 0x%.2lx\n",
+	blog_info("0x%.4lx     0x%.4lx     %-23s 0x%.2lx\n",
 	       vendor, device,
 	       pci_class_str(class), subclass);
 }
@@ -291,7 +291,7 @@ static void pciinfo(struct udevice *bus, bool short_listing, bool multi)
 	struct udevice *dev;
 
 	if (!multi)
-		printf("Scanning PCI devices on bus %d\n", dev_seq(bus));
+		blog_info("Scanning PCI devices on bus %d\n", dev_seq(bus));
 
 	if (!multi || dev_seq(bus) == 0)
 		pciinfo_header(short_listing);
@@ -303,11 +303,11 @@ static void pciinfo(struct udevice *bus, bool short_listing, bool multi)
 
 		pplat = dev_get_parent_plat(dev);
 		if (short_listing) {
-			printf("%02x.%02x.%02x   ", dev_seq(bus),
+			blog_info("%02x.%02x.%02x   ", dev_seq(bus),
 			       PCI_DEV(pplat->devfn), PCI_FUNC(pplat->devfn));
 			pci_header_show_brief(dev);
 		} else {
-			printf("\nFound PCI device %02x.%02x.%02x:\n",
+			blog_info("\nFound PCI device %02x.%02x.%02x:\n",
 			       dev_seq(bus),
 			       PCI_DEV(pplat->devfn), PCI_FUNC(pplat->devfn));
 			pci_header_show(dev);
@@ -366,16 +366,16 @@ static int pci_cfg_display(struct udevice *dev, ulong addr,
 	 */
 	nbytes = length * byte_size;
 	do {
-		printf("%08lx:", addr);
+		blog_info("%08lx:", addr);
 		linebytes = (nbytes > DISP_LINE_LEN) ? DISP_LINE_LEN : nbytes;
 		for (i = 0; i < linebytes; i += byte_size) {
 			unsigned long val;
 
 			dm_pci_read_config(dev, addr, &val, size);
-			printf(" %0*lx", pci_field_width(size), val);
+			blog_info(" %0*lx", pci_field_width(size), val);
 			addr += byte_size;
 		}
-		printf("\n");
+		blog_info("\n");
 		nbytes -= linebytes;
 		if (ctrlc()) {
 			rc = 1;
@@ -403,9 +403,9 @@ static int pci_cfg_modify(struct udevice *dev, ulong addr, ulong size,
 	 * the next value.  A non-converted value exits.
 	 */
 	do {
-		printf("%08lx:", addr);
+		blog_info("%08lx:", addr);
 		dm_pci_read_config(dev, addr, &val, size);
-		printf(" %0*lx", pci_field_width(size), val);
+		blog_info(" %0*lx", pci_field_width(size), val);
 
 		nbytes = cli_readline(" ? ");
 		if (nbytes == 0 || (nbytes == 1 && console_buffer[0] == '-')) {
@@ -461,25 +461,25 @@ static void pci_show_regions(struct udevice *bus)
 	int i, j;
 
 	if (!hose) {
-		printf("Bus '%s' is not a PCI controller\n", bus->name);
+		blog_info("Bus '%s' is not a PCI controller\n", bus->name);
 		return;
 	}
 
-	printf("Buses %02x-%02x\n", hose->first_busno, hose->last_busno);
-	printf("#   %-18s %-18s %-18s  %s\n", "Bus start", "Phys start", "Size",
+	blog_info("Buses %02x-%02x\n", hose->first_busno, hose->last_busno);
+	blog_info("#   %-18s %-18s %-18s  %s\n", "Bus start", "Phys start", "Size",
 	       "Flags");
 	for (i = 0, reg = hose->regions; i < hose->region_count; i++, reg++) {
-		printf("%d   %#018llx %#018llx %#018llx  ", i,
+		blog_info("%d   %#018llx %#018llx %#018llx  ", i,
 		       (unsigned long long)reg->bus_start,
 		       (unsigned long long)reg->phys_start,
 		       (unsigned long long)reg->size);
 		if (!(reg->flags & PCI_REGION_TYPE))
-			printf("mem ");
+			blog_info("mem ");
 		for (j = 0; j < ARRAY_SIZE(pci_flag_info); j++) {
 			if (reg->flags & pci_flag_info[j].flag)
-				printf("%s ", pci_flag_info[j].name);
+				blog_info("%s ", pci_flag_info[j].name);
 		}
-		printf("\n");
+		blog_info("\n");
 	}
 }
 
@@ -569,7 +569,7 @@ static int do_pci(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 		}
 		ret = uclass_get_device_by_seq(UCLASS_PCI, busnum, &bus);
 		if (ret) {
-			printf("No such bus\n");
+			blog_info("No such bus\n");
 			return CMD_RET_FAILURE;
 		}
 		if (cmd == 'r')
@@ -581,7 +581,7 @@ static int do_pci(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 
 	ret = dm_pci_bus_find_bdf(bdf, &dev);
 	if (ret) {
-		printf("No such device\n");
+		blog_info("No such device\n");
 		return CMD_RET_FAILURE;
 	}
 

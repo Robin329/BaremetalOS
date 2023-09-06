@@ -143,7 +143,7 @@ char *from_env(const char *envvar)
 	ret = env_get(envvar);
 
 	if (!ret)
-		printf("missing environment variable: %s\n", envvar);
+		blog_info("missing environment variable: %s\n", envvar);
 
 	return ret;
 }
@@ -176,7 +176,7 @@ static int env_get_from_linear(const char *env, const char *name, char *buf,
 
 		if (len <= res) {
 			buf[len - 1] = '\0';
-			printf("env_buf [%u bytes] too small for value of \"%s\"\n",
+			blog_info("env_buf [%u bytes] too small for value of \"%s\"\n",
 			       len, name);
 		}
 
@@ -257,13 +257,13 @@ void env_set_default(const char *s, int flags)
 {
 	if (s) {
 		if ((flags & H_INTERACTIVE) == 0) {
-			printf("*** Warning - %s, "
+			blog_info("*** Warning - %s, "
 				"using default environment\n\n", s);
 		} else {
 			puts(s);
 		}
 	} else {
-		debug("Using default environment\n");
+		blog_dbg("Using default environment\n");
 	}
 
 	flags |= H_DEFAULT;
@@ -535,7 +535,7 @@ void env_import_fdt(void)
 
 	node = ofnode_path(path);
 	if (!ofnode_valid(node)) {
-		printf("Warning: device tree node '%s' not found\n", path);
+		blog_info("Warning: device tree node '%s' not found\n", path);
 		return;
 	}
 

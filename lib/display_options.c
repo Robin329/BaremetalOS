@@ -46,7 +46,7 @@ int display_options(void)
 	char buf[DISPLAY_OPTIONS_BANNER_LENGTH];
 
 	display_options_get_banner(true, buf, sizeof(buf));
-	printf("%s", buf);
+	blog_info("%s", buf);
 
 	return 0;
 }
@@ -68,7 +68,7 @@ void print_freq(uint64_t freq, const char *s)
 	}
 
 	if (!c) {
-		printf("%llu Hz%s", freq, s);
+		blog_info("%llu Hz%s", freq, s);
 		return;
 	}
 
@@ -85,10 +85,10 @@ void print_freq(uint64_t freq, const char *s)
 			m = (m / 10) + (m % 100 >= 50);
 	}
 
-	printf("%lu", (unsigned long) freq);
+	blog_info("%lu", (unsigned long) freq);
 	if (m)
-		printf(".%ld", m);
-	printf(" %cHz%s", c, s);
+		blog_info(".%ld", m);
+	blog_info(" %cHz%s", c, s);
 }
 
 void print_size(uint64_t size, const char *s)
@@ -109,7 +109,7 @@ void print_size(uint64_t size, const char *s)
 
 	if (!c) {
 		/*
-		 * SPL tiny-printf is not capable for printing uint64_t.
+		 * SPL tiny-blog_info is not capable for printing uint64_t.
 		 * We have just checked that the size is small enought to fit
 		 * unsigned int safely.
 		 */
@@ -138,9 +138,9 @@ void print_size(uint64_t size, const char *s)
 
 	printf ("%lu", n);
 	if (m) {
-		printf (".%ld", m);
+		printf(".%ld", m);
 	}
-	printf (" %ciB%s", c, s);
+	printf(" %ciB%s\n", c, s);
 }
 
 #define MAX_LINE_LENGTH_BYTES		64

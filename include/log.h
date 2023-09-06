@@ -268,8 +268,46 @@ int _log_buffer(enum log_category_t cat, enum log_level_t level,
 #endif /* _DEBUG */
 
 /* Show a message if DEBUG is defined in a file */
-#define debug(fmt, args...)			\
-	debug_cond(_DEBUG, fmt, ##args)
+#define debug(fmt, args...) debug_cond(_DEBUG, fmt, ##args)
+
+#if CONFIG_IS_ENABLED(BAREMETAL_OS)
+#define BAREMETAL_OS_STRING "B-OS"
+enum { B_LOG_OFF,
+       B_LOG_ERR,
+       B_LOG_WARN,
+       B_LOG_INFO,
+       B_LOG_DBG,
+};
+#define blog_err(fmt, ...)                                                     \
+	({                                                                     \
+		if (CONFIG_BAREMETAL_LOGLEVEL == B_LOG_ERR)                    \
+			printf(BAREMETAL_OS_STRING " [ERR] : " fmt,            \
+			       ##__VA_ARGS__);                                 \
+	})
+#define blog_info(fmt, ...)                                                    \
+	({                                                                     \
+		if (CONFIG_BAREMETAL_LOGLEVEL == B_LOG_INFO)                   \
+			printf(BAREMETAL_OS_STRING " [INFO]: " fmt,            \
+			       ##__VA_ARGS__);                                 \
+	})
+#define blog_dbg(fmt, ...)                                                     \
+	({                                                                     \
+		if (CONFIG_BAREMETAL_LOGLEVEL == B_LOG_DBG)                    \
+			printf(BAREMETAL_OS_STRING " [DBG] : " fmt,            \
+			       ##__VA_ARGS__);                                 \
+	})
+#define blog_warn(fmt, ...)                                                    \
+	({                                                                     \
+		if (CONFIG_BAREMETAL_LOGLEVEL == B_LOG_WARN)                   \
+			printf(BAREMETAL_OS_STRING " [WARN]: " fmt,            \
+			       ##__VA_ARGS__);                                 \
+	})
+#else
+#define blog_err(fmt, ...)
+#define blog_dbg(fmt, ...)
+#define blog_warn(fmt, ...)
+#define blog_info(fmt, ...)
+#endif
 
 /* Show a message if not in SPL */
 #define warn_non_spl(fmt, args...)			\

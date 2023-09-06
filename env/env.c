@@ -206,7 +206,7 @@ int env_load(void)
 		if (!env_has_inited(drv->location))
 			continue;
 
-		printf("Loading Environment from %s...\n", drv->name);
+		blog_info("Loading Environment from %s...\n", drv->name);
 		/*
 		 * In error case, the error message must be printed during
 		 * drv->load() in some underlying API, and it must be exactly
@@ -214,7 +214,7 @@ int env_load(void)
 		 */
 		ret = drv->load();
 		if (!ret) {
-			printf("OK\n");
+			blog_info("OK\n");
 			gd->env_load_prio = prio;
 
 #if !CONFIG_IS_ENABLED(ENV_APPEND)
@@ -256,18 +256,18 @@ int env_reload(void)
 	if (drv) {
 		int ret;
 
-		printf("Loading Environment from %s... \n", drv->name);
+		blog_info("Loading Environment from %s... \n", drv->name);
 
 		if (!env_has_inited(drv->location)) {
-			printf("not initialized\n");
+			blog_info("not initialized\n");
 			return -ENODEV;
 		}
 
 		ret = drv->load();
 		if (ret)
-			printf("Failed (%d)\n", ret);
+			blog_info("Failed (%d)\n", ret);
 		else
-			printf("OK\n");
+			blog_info("OK\n");
 
 		if (!ret)
 			return 0;
@@ -284,22 +284,22 @@ int env_save(void)
 	if (drv) {
 		int ret;
 
-		printf("Saving Environment to %s... ", drv->name);
+		blog_info("Saving Environment to %s... ", drv->name);
 		if (!drv->save) {
-			printf("not possible\n");
+			blog_info("not possible\n");
 			return -ENODEV;
 		}
 
 		if (!env_has_inited(drv->location)) {
-			printf("not initialized\n");
+			blog_info("not initialized\n");
 			return -ENODEV;
 		}
 
 		ret = drv->save();
 		if (ret)
-			printf("Failed (%d)\n", ret);
+			blog_info("Failed (%d)\n", ret);
 		else
-			printf("OK\n");
+			blog_info("OK\n");
 
 		if (!ret)
 			return 0;
@@ -317,21 +317,21 @@ int env_erase(void)
 		int ret;
 
 		if (!drv->erase) {
-			printf("not possible\n");
+			blog_info("not possible\n");
 			return -ENODEV;
 		}
 
 		if (!env_has_inited(drv->location)) {
-			printf("not initialized\n");
+			blog_info("not initialized\n");
 			return -ENODEV;
 		}
 
-		printf("Erasing Environment on %s... ", drv->name);
+		blog_info("Erasing Environment on %s... ", drv->name);
 		ret = drv->erase();
 		if (ret)
-			printf("Failed (%d)\n", ret);
+			blog_info("Failed (%d)\n", ret);
 		else
-			printf("OK\n");
+			blog_info("OK\n");
 
 		if (!ret)
 			return 0;
@@ -380,7 +380,7 @@ int env_select(const char *name)
 	int prio;
 	bool found = false;
 
-	printf("Select Environment on %s: ", name);
+	blog_info("Select Environment on %s: ", name);
 
 	/* search ENV driver by name */
 	drv = ll_entry_start(struct env_driver, env_driver);
@@ -392,7 +392,7 @@ int env_select(const char *name)
 	}
 
 	if (!found) {
-		printf("driver not found\n");
+		blog_info("driver not found\n");
 		return -ENODEV;
 	}
 
@@ -405,11 +405,11 @@ int env_select(const char *name)
 				gd->env_valid = ENV_INVALID;
 				gd->flags &= ~GD_FLG_ENV_DEFAULT;
 			}
-			printf("OK\n");
+			blog_info("OK\n");
 			return 0;
 		}
 	}
-	printf("priority not found\n");
+	blog_info("priority not found\n");
 
 	return -ENODEV;
 }

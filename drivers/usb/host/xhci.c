@@ -159,7 +159,7 @@ static int xhci_start(struct xhci_hcor *hcor)
 	u32 temp;
 	int ret;
 
-	printf("Starting the controller\n");
+	blog_info("Starting the controller\n");
 	temp = xhci_readl(&hcor->or_usbcmd);
 	temp |= (CMD_RUN);
 	xhci_writel(&hcor->or_usbcmd, temp);
@@ -200,7 +200,7 @@ static int xhci_reset(struct xhci_hcor *hcor)
 	ret = handshake(&hcor->or_usbsts,
 			STS_HALT, STS_HALT, XHCI_MAX_HALT_USEC);
 	if (ret) {
-		printf("Host not halted after %u microseconds.\n",
+		blog_info("Host not halted after %u microseconds.\n",
 				XHCI_MAX_HALT_USEC);
 		return -EBUSY;
 	}
@@ -460,7 +460,7 @@ static int xhci_configure_endpoints(struct usb_device *udev, bool ctx_change)
 			ctx_change ? "Evaluate Context" : "Configure Endpoint");
 		break;
 	default:
-		printf("ERROR: %s command returned completion code %d.\n",
+		blog_info("ERROR: %s command returned completion code %d.\n",
 			ctx_change ? "Evaluate Context" : "Configure Endpoint",
 			GET_COMP_CODE(le32_to_cpu(event->event_cmd.status)));
 		return -EINVAL;
@@ -652,7 +652,7 @@ static int xhci_address_device(struct usb_device *udev, int root_portnr)
 	switch (GET_COMP_CODE(le32_to_cpu(event->event_cmd.status))) {
 	case COMP_CTX_STATE:
 	case COMP_EBADSLT:
-		printf("Setup ERROR: address device command for slot %d.\n",
+		blog_info("Setup ERROR: address device command for slot %d.\n",
 								slot_id);
 		ret = -EINVAL;
 		break;
@@ -670,7 +670,7 @@ static int xhci_address_device(struct usb_device *udev, int root_portnr)
 		udev->status = 0;
 		break;
 	default:
-		printf("ERROR: unexpected command completion code 0x%x.\n",
+		blog_info("ERROR: unexpected command completion code 0x%x.\n",
 			GET_COMP_CODE(le32_to_cpu(event->event_cmd.status)));
 		ret = -EINVAL;
 		break;
@@ -887,7 +887,7 @@ static int xhci_submit_root(struct usb_device *udev, unsigned long pipe,
 
 	if ((req->requesttype & USB_RT_PORT) &&
 	    le16_to_cpu(req->index) > max_ports) {
-		printf("The request port(%d) exceeds maximum port number\n",
+		blog_info("The request port(%d) exceeds maximum port number\n",
 		       le16_to_cpu(req->index) - 1);
 		return -EINVAL;
 	}
@@ -929,13 +929,13 @@ static int xhci_submit_root(struct usb_device *udev, unsigned long pipe,
 				srclen = 42;
 				break;
 			default:
-				printf("unknown value DT_STRING %x\n",
+				blog_info("unknown value DT_STRING %x\n",
 					le16_to_cpu(req->value));
 				goto unknown;
 			}
 			break;
 		default:
-			printf("unknown value %x\n", le16_to_cpu(req->value));
+			blog_info("unknown value %x\n", le16_to_cpu(req->value));
 			goto unknown;
 		}
 		break;
@@ -948,7 +948,7 @@ static int xhci_submit_root(struct usb_device *udev, unsigned long pipe,
 			srclen = 0x8;
 			break;
 		default:
-			printf("unknown value %x\n", le16_to_cpu(req->value));
+			blog_info("unknown value %x\n", le16_to_cpu(req->value));
 			goto unknown;
 		}
 		break;
@@ -1036,7 +1036,7 @@ static int xhci_submit_root(struct usb_device *udev, unsigned long pipe,
 			xhci_writel(status_reg, reg);
 			break;
 		default:
-			printf("unknown feature %x\n", le16_to_cpu(req->value));
+			blog_info("unknown feature %x\n", le16_to_cpu(req->value));
 			goto unknown;
 		}
 		break;
@@ -1059,7 +1059,7 @@ static int xhci_submit_root(struct usb_device *udev, unsigned long pipe,
 							status_reg, reg);
 			break;
 		default:
-			printf("unknown feature %x\n", le16_to_cpu(req->value));
+			blog_info("unknown feature %x\n", le16_to_cpu(req->value));
 			goto unknown;
 		}
 		xhci_writel(status_reg, reg);
@@ -1106,7 +1106,7 @@ static int _xhci_submit_int_msg(struct usb_device *udev, unsigned long pipe,
 				bool nonblock)
 {
 	if (usb_pipetype(pipe) != PIPE_INTERRUPT) {
-		printf("non-interrupt pipe (type=%lu)", usb_pipetype(pipe));
+		blog_info("non-interrupt pipe (type=%lu)", usb_pipetype(pipe));
 		return -EINVAL;
 	}
 
@@ -1132,7 +1132,7 @@ static int _xhci_submit_bulk_msg(struct usb_device *udev, unsigned long pipe,
 				 void *buffer, int length)
 {
 	if (usb_pipetype(pipe) != PIPE_BULK) {
-		printf("non-bulk pipe (type=%lu)", usb_pipetype(pipe));
+		blog_info("non-bulk pipe (type=%lu)", usb_pipetype(pipe));
 		return -EINVAL;
 	}
 
@@ -1158,7 +1158,7 @@ static int _xhci_submit_control_msg(struct usb_device *udev, unsigned long pipe,
 	int ret = 0;
 
 	if (usb_pipetype(pipe) != PIPE_CONTROL) {
-		printf("non-control pipe (type=%lu)", usb_pipetype(pipe));
+		blog_info("non-control pipe (type=%lu)", usb_pipetype(pipe));
 		return -EINVAL;
 	}
 
@@ -1207,7 +1207,7 @@ static int xhci_lowlevel_init(struct xhci_ctrl *ctrl)
 
 	reg = xhci_readl(&hccr->cr_hcsparams1);
 	ctrl->hub_desc.bNbrPorts = HCS_MAX_PORTS(reg);
-	printf("Register %x NbrPorts %d\n", reg, ctrl->hub_desc.bNbrPorts);
+	blog_info("Register %x NbrPorts %d\n", reg, ctrl->hub_desc.bNbrPorts);
 
 	/* Port Indicators */
 	reg = xhci_readl(&hccr->cr_hccparams);
@@ -1230,7 +1230,7 @@ static int xhci_lowlevel_init(struct xhci_ctrl *ctrl)
 	xhci_writel(&ctrl->ir_set->irq_pending, 0x0);
 
 	reg = HC_VERSION(xhci_readl(&hccr->cr_capbase));
-	printf("USB XHCI %x.%02x\n", reg >> 8, reg & 0xff);
+	blog_info("USB XHCI %x.%02x\n", reg >> 8, reg & 0xff);
 	ctrl->hci_version = reg;
 
 	return 0;
