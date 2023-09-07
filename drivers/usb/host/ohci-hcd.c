@@ -2121,7 +2121,7 @@ int ohci_register(struct udevice *dev, struct ohci_regs *regs)
 		return -EIO;
 
 	reg = ohci_readl(&regs->revision);
-	blog_info("USB OHCI %x.%x\n", (reg >> 4) & 0xf, reg & 0xf);
+	printf("USB OHCI %x.%x\n", (reg >> 4) & 0xf, reg & 0xf);
 
 	return 0;
 }

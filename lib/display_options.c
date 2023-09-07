@@ -46,7 +46,7 @@ int display_options(void)
 	char buf[DISPLAY_OPTIONS_BANNER_LENGTH];
 
 	display_options_get_banner(true, buf, sizeof(buf));
-	blog_info("%s", buf);
+	printf("\n\n%s", buf);
 
 	return 0;
 }

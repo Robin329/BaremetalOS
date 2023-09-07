@@ -170,7 +170,7 @@ static int xhci_start(struct xhci_hcor *hcor)
 	 */
 	ret = handshake(&hcor->or_usbsts, STS_HALT, 0, XHCI_MAX_HALT_USEC);
 	if (ret)
-		debug("Host took too long to start, "
+		blog_dbg("Host took too long to start, "
 				"waited %u microseconds.\n",
 				XHCI_MAX_HALT_USEC);
 	return ret;
@@ -189,7 +189,7 @@ static int xhci_reset(struct xhci_hcor *hcor)
 	int ret;
 
 	/* Halting the Host first */
-	debug("// Halt the HC: %p\n", hcor);
+	blog_dbg("// Halt the HC: %p\n", hcor);
 	state = xhci_readl(&hcor->or_usbsts) & STS_HALT;
 	if (!state) {
 		cmd = xhci_readl(&hcor->or_usbcmd);
@@ -205,7 +205,7 @@ static int xhci_reset(struct xhci_hcor *hcor)
 		return -EBUSY;
 	}
 
-	debug("// Reset the HC\n");
+	blog_dbg("// Reset the HC\n");
 	cmd = xhci_readl(&hcor->or_usbcmd);
 	cmd |= CMD_RESET;
 	xhci_writel(&hcor->or_usbcmd, cmd);
@@ -260,7 +260,7 @@ static unsigned int xhci_microframes_to_exponent(unsigned int desc_interval,
 	interval = fls(desc_interval) - 1;
 	interval = clamp_val(interval, min_exponent, max_exponent);
 	if ((1 << interval) != desc_interval)
-		debug("rounding interval to %d microframes, "\
+		blog_dbg("rounding interval to %d microframes, "\
 		      "ep desc says %d microframes\n",
 		      1 << interval, desc_interval);
 
@@ -293,7 +293,7 @@ static unsigned int xhci_parse_exponent_interval(struct usb_device *udev,
 
 	interval = clamp_val(endpt_desc->bInterval, 1, 16) - 1;
 	if (interval != endpt_desc->bInterval - 1)
-		debug("ep %#x - rounding interval to %d %sframes\n",
+		blog_dbg("ep %#x - rounding interval to %d %sframes\n",
 		      endpt_desc->bEndpointAddress, 1 << interval,
 		      udev->speed == USB_SPEED_FULL ? "" : "micro");
 
@@ -456,7 +456,7 @@ static int xhci_configure_endpoints(struct usb_device *udev, bool ctx_change)
 
 	switch (GET_COMP_CODE(le32_to_cpu(event->event_cmd.status))) {
 	case COMP_SUCCESS:
-		debug("Successful %s command\n",
+		blog_dbg("Successful %s command\n",
 			ctx_change ? "Evaluate Context" : "Configure Endpoint");
 		break;
 	default:
@@ -637,7 +637,7 @@ static int xhci_address_device(struct usb_device *udev, int root_portnr)
 	 * This is the first Set Address since device plug-in
 	 * so setting up the slot context.
 	 */
-	debug("Setting up addressable devices %p\n", ctrl->dcbaa);
+	blog_dbg("Setting up addressable devices %p\n", ctrl->dcbaa);
 	xhci_setup_addressable_virt_dev(ctrl, udev, root_portnr);
 
 	ctrl_ctx = xhci_get_input_control_ctx(virt_dev->in_ctx);
@@ -666,7 +666,7 @@ static int xhci_address_device(struct usb_device *udev, int root_portnr)
 		ret = -ENODEV;
 		break;
 	case COMP_SUCCESS:
-		debug("Successful Address Device command\n");
+		blog_dbg("Successful Address Device command\n");
 		udev->status = 0;
 		break;
 	default:
@@ -689,7 +689,7 @@ static int xhci_address_device(struct usb_device *udev, int root_portnr)
 			 virt_dev->out_ctx->size);
 	slot_ctx = xhci_get_slot_ctx(ctrl, virt_dev->out_ctx);
 
-	debug("xHC internal address is: %d\n",
+	blog_dbg("xHC internal address is: %d\n",
 		le32_to_cpu(slot_ctx->dev_state) & DEV_ADDR_MASK);
 
 	return 0;
@@ -771,10 +771,10 @@ int xhci_check_maxpacket(struct usb_device *udev)
 	hw_max_packet_size = MAX_PACKET_DECODED(le32_to_cpu(ep_ctx->ep_info2));
 	max_packet_size = udev->epmaxpacketin[0];
 	if (hw_max_packet_size != max_packet_size) {
-		debug("Max Packet Size for ep 0 changed.\n");
-		debug("Max packet size in usb_device = %d\n", max_packet_size);
-		debug("Max packet size in xHCI HW = %d\n", hw_max_packet_size);
-		debug("Issuing evaluate context command.\n");
+		blog_dbg("Max Packet Size for ep 0 changed.\n");
+		blog_dbg("Max packet size in usb_device = %d\n", max_packet_size);
+		blog_dbg("Max packet size in xHCI HW = %d\n", hw_max_packet_size);
+		blog_dbg("Issuing evaluate context command.\n");
 
 		/* Set up the modified control endpoint 0 */
 		xhci_endpoint_copy(ctrl, ctrl->devs[slot_id]->in_ctx,
@@ -843,7 +843,7 @@ static void xhci_clear_port_change_bit(u16 wValue,
 	xhci_writel(addr, port_status | status);
 
 	port_status = xhci_readl(addr);
-	debug("clear port %s change, actual port %d status  = 0x%x\n",
+	blog_dbg("clear port %s change, actual port %d status  = 0x%x\n",
 			port_change_bit, wIndex, port_status);
 }
 
@@ -902,17 +902,17 @@ static int xhci_submit_root(struct usb_device *udev, unsigned long pipe,
 	case DeviceRequest | USB_REQ_GET_DESCRIPTOR:
 		switch (le16_to_cpu(req->value) >> 8) {
 		case USB_DT_DEVICE:
-			debug("USB_DT_DEVICE request\n");
+			blog_dbg("USB_DT_DEVICE request\n");
 			srcptr = &descriptor.device;
 			srclen = 0x12;
 			break;
 		case USB_DT_CONFIG:
-			debug("USB_DT_CONFIG config\n");
+			blog_dbg("USB_DT_CONFIG config\n");
 			srcptr = &descriptor.config;
 			srclen = 0x19;
 			break;
 		case USB_DT_STRING:
-			debug("USB_DT_STRING config\n");
+			blog_dbg("USB_DT_STRING config\n");
 			switch (le16_to_cpu(req->value) & 0xff) {
 			case 0:	/* Language */
 				srcptr = "\4\3\11\4";
@@ -943,7 +943,7 @@ static int xhci_submit_root(struct usb_device *udev, unsigned long pipe,
 		switch (le16_to_cpu(req->value) >> 8) {
 		case USB_DT_HUB:
 		case USB_DT_SS_HUB:
-			debug("USB_DT_HUB config\n");
+			blog_dbg("USB_DT_HUB config\n");
 			srcptr = &ctrl->hub_desc;
 			srclen = 0x8;
 			break;
@@ -953,7 +953,7 @@ static int xhci_submit_root(struct usb_device *udev, unsigned long pipe,
 		}
 		break;
 	case USB_REQ_SET_ADDRESS | (USB_RECIP_DEVICE << 8):
-		debug("USB_REQ_SET_ADDRESS\n");
+		blog_dbg("USB_REQ_SET_ADDRESS\n");
 		ctrl->rootdev = le16_to_cpu(req->value);
 		break;
 	case DeviceOutRequest | USB_REQ_SET_CONFIGURATION:
@@ -972,18 +972,18 @@ static int xhci_submit_root(struct usb_device *udev, unsigned long pipe,
 			tmpbuf[0] |= USB_PORT_STAT_CONNECTION;
 			switch (reg & DEV_SPEED_MASK) {
 			case XDEV_FS:
-				debug("SPEED = FULLSPEED\n");
+				blog_dbg("SPEED = FULLSPEED\n");
 				break;
 			case XDEV_LS:
-				debug("SPEED = LOWSPEED\n");
+				blog_dbg("SPEED = LOWSPEED\n");
 				tmpbuf[1] |= USB_PORT_STAT_LOW_SPEED >> 8;
 				break;
 			case XDEV_HS:
-				debug("SPEED = HIGHSPEED\n");
+				blog_dbg("SPEED = HIGHSPEED\n");
 				tmpbuf[1] |= USB_PORT_STAT_HIGH_SPEED >> 8;
 				break;
 			case XDEV_SS:
-				debug("SPEED = SUPERSPEED\n");
+				blog_dbg("SPEED = SUPERSPEED\n");
 				tmpbuf[1] |= USB_PORT_STAT_SUPER_SPEED >> 8;
 				break;
 			}
@@ -1069,7 +1069,7 @@ static int xhci_submit_root(struct usb_device *udev, unsigned long pipe,
 		goto unknown;
 	}
 
-	debug("scrlen = %d\n req->length = %d\n",
+	blog_dbg("scrlen = %d\n req->length = %d\n",
 		srclen, le16_to_cpu(req->length));
 
 	len = min(srclen, (int)le16_to_cpu(req->length));
@@ -1077,7 +1077,7 @@ static int xhci_submit_root(struct usb_device *udev, unsigned long pipe,
 	if (srcptr != NULL && len > 0)
 		memcpy(buffer, srcptr, len);
 	else
-		debug("Len is 0\n");
+		blog_dbg("Len is 0\n");
 
 	udev->act_len = len;
 	udev->status = 0;
@@ -1207,7 +1207,7 @@ static int xhci_lowlevel_init(struct xhci_ctrl *ctrl)
 
 	reg = xhci_readl(&hccr->cr_hcsparams1);
 	ctrl->hub_desc.bNbrPorts = HCS_MAX_PORTS(reg);
-	blog_info("Register %x NbrPorts %d\n", reg, ctrl->hub_desc.bNbrPorts);
+	printf("Register %x NbrPorts %d\n", reg, ctrl->hub_desc.bNbrPorts);
 
 	/* Port Indicators */
 	reg = xhci_readl(&hccr->cr_hccparams);
@@ -1242,7 +1242,7 @@ static int xhci_lowlevel_stop(struct xhci_ctrl *ctrl)
 
 	xhci_reset(ctrl->hcor);
 
-	debug("// Disabling event ring interrupts\n");
+	blog_dbg("// Disabling event ring interrupts\n");
 	temp = xhci_readl(&ctrl->hcor->or_usbsts);
 	xhci_writel(&ctrl->hcor->or_usbsts, temp & ~STS_EINT);
 	temp = xhci_readl(&ctrl->ir_set->irq_pending);
@@ -1259,7 +1259,7 @@ static int xhci_submit_control_msg(struct udevice *dev, struct usb_device *udev,
 	struct udevice *hub;
 	int root_portnr = 0;
 
-	debug("%s: dev='%s', udev=%p, udev->dev='%s', portnr=%d\n", __func__,
+	blog_dbg("%s: dev='%s', udev=%p, udev->dev='%s', portnr=%d\n", __func__,
 	      dev->name, udev, udev->dev->name, udev->portnr);
 	hub = udev->dev;
 	if (device_get_uclass_id(hub) == UCLASS_USB_HUB) {
@@ -1287,7 +1287,7 @@ static int xhci_submit_control_msg(struct udevice *dev, struct usb_device *udev,
 static int xhci_submit_bulk_msg(struct udevice *dev, struct usb_device *udev,
 				unsigned long pipe, void *buffer, int length)
 {
-	debug("%s: dev='%s', udev=%p\n", __func__, dev->name, udev);
+	blog_dbg("%s: dev='%s', udev=%p\n", __func__, dev->name, udev);
 	return _xhci_submit_bulk_msg(udev, pipe, buffer, length);
 }
 
@@ -1295,14 +1295,14 @@ static int xhci_submit_int_msg(struct udevice *dev, struct usb_device *udev,
 			       unsigned long pipe, void *buffer, int length,
 			       int interval, bool nonblock)
 {
-	debug("%s: dev='%s', udev=%p\n", __func__, dev->name, udev);
+	blog_dbg("%s: dev='%s', udev=%p\n", __func__, dev->name, udev);
 	return _xhci_submit_int_msg(udev, pipe, buffer, length, interval,
 				    nonblock);
 }
 
 static int xhci_alloc_device(struct udevice *dev, struct usb_device *udev)
 {
-	debug("%s: dev='%s', udev=%p\n", __func__, dev->name, udev);
+	blog_dbg("%s: dev='%s', udev=%p\n", __func__, dev->name, udev);
 	return _xhci_alloc_device(udev);
 }
 
@@ -1318,7 +1318,7 @@ static int xhci_update_hub_device(struct udevice *dev, struct usb_device *udev)
 	int slot_id = udev->slot_id;
 	unsigned think_time;
 
-	debug("%s: dev='%s', udev=%p\n", __func__, dev->name, udev);
+	blog_dbg("%s: dev='%s', udev=%p\n", __func__, dev->name, udev);
 
 	/* Ignore root hubs */
 	if (usb_hub_is_root_hub(udev->dev))
@@ -1393,7 +1393,7 @@ int xhci_register(struct udevice *dev, struct xhci_hccr *hccr,
 	struct usb_bus_priv *priv = dev_get_uclass_priv(dev);
 	int ret;
 
-	debug("%s: dev='%s', ctrl=%p, hccr=%p, hcor=%p\n", __func__, dev->name,
+	blog_dbg("%s: dev='%s', ctrl=%p, hccr=%p, hcor=%p\n", __func__, dev->name,
 	      ctrl, hccr, hcor);
 
 	ctrl->dev = dev;
@@ -1419,7 +1419,7 @@ int xhci_register(struct udevice *dev, struct xhci_hccr *hccr,
 	return 0;
 err:
 	free(ctrl);
-	debug("%s: failed, ret=%d\n", __func__, ret);
+	blog_dbg("%s: failed, ret=%d\n", __func__, ret);
 	return ret;
 }
 
