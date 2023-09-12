@@ -104,6 +104,8 @@ CONFIG_ABORT_BOOT_OPTION=y
 # --------------------
 # BareMetal OS config
 # --------------------
+CONFIG_VIDEO_LOGO=y
+CONFIG_VIDEO_BMP_LOGO=y
 CONFIG_CMD_USB=y
 CONFIG_BAREMETAL_OS=y
 CONFIG_BAREMETAL_HELLO=y

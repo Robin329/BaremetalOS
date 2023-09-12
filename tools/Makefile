@@ -298,14 +298,15 @@ LOGO-$(CONFIG_VIDEO_LOGO) += $(LOGO_DATA_H)
 
 # Generic logo
 ifeq ($(LOGO_BMP),)
-LOGO_BMP= $(srctree)/$(src)/logos/denx.bmp
+LOGO_BMP= $(srctree)/$(src)/logos/baremetalOS_logo.bmp
 
 # Use board logo and fallback to vendor
 ifneq ($(wildcard $(srctree)/$(src)/logos/$(BOARD).bmp),)
 LOGO_BMP= $(srctree)/$(src)/logos/$(BOARD).bmp
 else
 ifneq ($(wildcard $(srctree)/$(src)/logos/$(VENDOR).bmp),)
-LOGO_BMP= $(srctree)/$(src)/logos/$(VENDOR).bmp
+# LOGO_BMP= $(srctree)/$(src)/logos/$(VENDOR).bmp
+LOGO_BMP= $(srctree)/$(src)/logos/baremetalOS_logo.bmp
 endif
 endif
 

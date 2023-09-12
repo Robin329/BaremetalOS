@@ -12,17 +12,37 @@
 #include <edid.h>
 
 #define HDMI_EDID_BLOCK_SIZE            128
-
+/* clang-format off */
 /* Identification Registers */
 #define HDMI_DESIGN_ID                          0x0000
 #define HDMI_REVISION_ID                        0x0001
 #define HDMI_PRODUCT_ID0                        0x0002
 #define HDMI_PRODUCT_ID1                        0x0003
 #define HDMI_CONFIG0_ID                         0x0004
+ #define INTER_PIXEL 							BIT(7)
+ #define AUDSPIDIF                              BIT(5)
+ #define I2SPORT                                BIT(4)
+ #define HDMI_1_4                               BIT(3)
+ #define CSC                                    BIT(2)
+ #define CEC                                    BIT(1)
+ #define HDCP                                   BIT(0)
 #define HDMI_CONFIG1_ID                         0x0005
+ #define HDCP22_SNPS                            BIT(7)
+ #define HDCP22_EXT                             BIT(6)
+ #define HDMI20                                 BIT(5)
+ #define APB                                    BIT(1)
 #define HDMI_CONFIG2_ID                         0x0006
+ #define PHY_TYPE_LEGACY 0x00
+ #define PHY_TYPE_GEN2   0xF2
+ #define PHY_TYPE_GEN2_HEAC 0xE2
+ #define PHY_TYPE_MHL_COMBO 0xC2
+ #define PHY_TYPE_MHL_COMBO_HEAC 0xB2
+ #define PHY_TYPE_HDMI20 0xF3
+ #define PHY_TYPE_HDMI20_HEAC 0xE3
+ #define PHY_TYPE_EXT 0xFE
 #define HDMI_CONFIG3_ID                         0x0007
-
+ #define CONF_AHB_AUDIO_DMA BIT(1)
+ #define CONF_GPAUD         BIT(0)
 /* Interrupt Registers */
 #define HDMI_IH_FC_STAT0                        0x0100
 #define HDMI_IH_FC_STAT1                        0x0101
@@ -223,7 +243,7 @@
 #define HDMI_I2CM_FS_SCL_LCNT_1_ADDR            0x7E11
 #define HDMI_I2CM_FS_SCL_LCNT_0_ADDR            0x7E12
 #define HDMI_I2CM_BUF0                          0x7E20
-
+/* clang-format on */
 enum {
 	/* HDMI PHY registers define */
 	PHY_OPMODE_PLLCFG = 0x06,

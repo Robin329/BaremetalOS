@@ -152,7 +152,7 @@ static void rkvop_enable_output(struct udevice *dev, enum vop_modes mode)
 		break;
 
 	default:
-		debug("%s: unsupported output mode %x\n", __func__, mode);
+		blog_info("%s: unsupported output mode %x\n", __func__, mode);
 	}
 
 }
@@ -259,7 +259,7 @@ static int rk_display_init(struct udevice *dev, ulong fbbase, ofnode ep_node)
 	const char *compat;
 	struct reset_ctl dclk_rst;
 
-	debug("%s(%s, 0x%lx, %s)\n", __func__,
+	blog_info("%s(%s, 0x%lx, %s)\n", __func__,
 	      dev_read_name(dev), fbbase, ofnode_get_name(ep_node));
 
 	ret = ofnode_read_u32(ep_node, "remote-endpoint", &remote_phandle);
@@ -270,7 +270,7 @@ static int rk_display_init(struct udevice *dev, ulong fbbase, ofnode ep_node)
 	if (!ofnode_valid(remote))
 		return -EINVAL;
 	remote_vop_id = ofnode_read_u32_default(remote, "reg", -1);
-	debug("remote vop_id=%d\n", remote_vop_id);
+	blog_info("remote vop_id=%d\n", remote_vop_id);
 
 	/*
 	 * The remote-endpoint references into a subnode of the encoder
@@ -294,7 +294,7 @@ static int rk_display_init(struct udevice *dev, ulong fbbase, ofnode ep_node)
 	while (ofnode_valid(remote)) {
 		remote = ofnode_get_parent(remote);
 		if (!ofnode_valid(remote)) {
-			debug("%s(%s): no UCLASS_DISPLAY for remote-endpoint\n",
+			blog_info("%s(%s): no UCLASS_DISPLAY for remote-endpoint\n",
 			      __func__, dev_read_name(dev));
 			return -EINVAL;
 		}
@@ -305,7 +305,7 @@ static int rk_display_init(struct udevice *dev, ulong fbbase, ofnode ep_node)
 	};
 	compat = ofnode_get_property(remote, "compatible", NULL);
 	if (!compat) {
-		debug("%s(%s): Failed to find compatible property\n",
+		blog_info("%s(%s): Failed to find compatible property\n",
 		      __func__, dev_read_name(dev));
 		return -EINVAL;
 	}
@@ -321,11 +321,11 @@ static int rk_display_init(struct udevice *dev, ulong fbbase, ofnode ep_node)
 	} else if (strstr(compat, "lvds")) {
 		vop_id = VOP_MODE_LVDS;
 	} else {
-		debug("%s(%s): Failed to find vop mode for %s\n",
+		blog_info("%s(%s): Failed to find vop mode for %s\n",
 		      __func__, dev_read_name(dev), compat);
 		return -EINVAL;
 	}
-	blog_info("vop_id=%d\n", vop_id);
+	blog_info("vop_id = %d\n", vop_id);
 
 	disp_uc_plat = dev_get_uclass_plat(disp);
 	blog_info("Found device '%s', disp_uc_priv=%p\n", disp->name,
@@ -350,7 +350,17 @@ static int rk_display_init(struct udevice *dev, ulong fbbase, ofnode ep_node)
 		blog_err("%s: Failed to read timings\n", __func__);
 		return ret;
 	}
-
+	blog_info("==== [timing]: ====\n");
+	blog_info("            Pixclk:%d\n", timing.pixelclock.typ);
+	blog_info("           Hactive:%d\n", timing.hactive.typ);
+	blog_info("               HFP:%d\n", timing.hfront_porch.typ);
+	blog_info("               HBP:%d\n", timing.hback_porch.typ);
+	blog_info("             HSYNC:%d\n", timing.hsync_len.typ);
+	blog_info("           Vactive:%d\n", timing.vactive.typ);
+	blog_info("               VFP:%d\n", timing.vfront_porch.typ);
+	blog_info("               VBP:%d\n", timing.vback_porch.typ);
+	blog_info("             VSYNC:%d\n", timing.vsync_len.typ);
+	blog_info("      hdmi monitor:%d\n", timing.hdmi_monitor);
 	ret = clk_get_by_index(dev, 1, &clk);
 	if (!ret)
 		ret = clk_set_rate(&clk, timing.pixelclock.typ);
@@ -393,7 +403,7 @@ static int rk_display_init(struct udevice *dev, ulong fbbase, ofnode ep_node)
 	uc_priv->xsize = timing.hactive.typ;
 	uc_priv->ysize = timing.vactive.typ;
 	uc_priv->bpix = l2bpp;
-	blog_info("fb=%lx, size=%d %d\n", fbbase, uc_priv->xsize,
+	blog_info("fb=%#lx, size=%dx%d\n", fbbase, uc_priv->xsize,
 		  uc_priv->ysize);
 
 	return 0;
@@ -408,7 +418,7 @@ void rk_vop_probe_regulators(struct udevice *dev,
 
 	for (i = 0; i < cnt; ++i) {
 		name = names[i];
-		debug("%s: probing regulator '%s'\n", dev->name, name);
+		blog_info("%s: probing regulator '%s'\n", dev->name, name);
 
 		ret = regulator_autoset_by_name(name, &reg);
 		if (!ret)
@@ -449,7 +459,7 @@ int rk_vop_probe(struct udevice *dev)
 	}
 
 #if defined(CONFIG_EFI_LOADER)
-	debug("Adding to EFI map %d @ %lx\n", plat->size, plat->base);
+	blog_info("Adding to EFI map %d @ %lx\n", plat->size, plat->base);
 	efi_add_memory_map(plat->base, plat->size, EFI_RESERVED_MEMORY_TYPE);
 #endif
 
@@ -465,7 +475,7 @@ int rk_vop_probe(struct udevice *dev)
 	 */
 	port = dev_read_subnode(dev, "port");
 	if (!ofnode_valid(port)) {
-		debug("%s(%s): 'port' subnode not found\n",
+		blog_info("%s(%s): 'port' subnode not found\n",
 		      __func__, dev_read_name(dev));
 		return -EINVAL;
 	}
@@ -475,7 +485,7 @@ int rk_vop_probe(struct udevice *dev)
 	     node = dev_read_next_subnode(node)) {
 		ret = rk_display_init(dev, plat->base, node);
 		if (ret)
-			debug("Device failed: ret=%d\n", ret);
+			blog_info("Device failed: ret=%d\n", ret);
 		if (!ret)
 			break;
 	}

@@ -13,55 +13,98 @@
 #include <media_bus_format.h>
 #include <linux/delay.h>
 #include "dw_hdmi.h"
-#undef debug
-#define debug printf
+
 struct tmds_n_cts {
 	u32 tmds;
 	u32 cts;
 	u32 n;
 };
 
-static const struct tmds_n_cts n_cts_table[] = {
-	{
-		.tmds = 25175000, .n = 6144, .cts = 25175,
-	}, {
-		.tmds = 25200000, .n = 6144, .cts = 25200,
-	}, {
-		.tmds = 27000000, .n = 6144, .cts = 27000,
-	}, {
-		.tmds = 27027000, .n = 6144, .cts = 27027,
-	}, {
-		.tmds = 40000000, .n = 6144, .cts = 40000,
-	}, {
-		.tmds = 54000000, .n = 6144, .cts = 54000,
-	}, {
-		.tmds = 54054000, .n = 6144, .cts = 54054,
-	}, {
-		.tmds = 65000000, .n = 6144, .cts = 65000,
-	}, {
-		.tmds = 74176000, .n = 11648, .cts = 140625,
-	}, {
-		.tmds = 74250000, .n = 6144, .cts = 74250,
-	}, {
-		.tmds = 83500000, .n = 6144, .cts = 83500,
-	}, {
-		.tmds = 106500000, .n = 6144, .cts = 106500,
-	}, {
-		.tmds = 108000000, .n = 6144, .cts = 108000,
-	}, {
-		.tmds = 148352000, .n = 5824, .cts = 140625,
-	}, {
-		.tmds = 148500000, .n = 6144, .cts = 148500,
-	}, {
-		.tmds = 297000000, .n = 5120, .cts = 247500,
-	}
-};
+static const struct tmds_n_cts n_cts_table[] = { {
+							 .tmds = 25175000,
+							 .n = 6144,
+							 .cts = 25175,
+						 },
+						 {
+							 .tmds = 25200000,
+							 .n = 6144,
+							 .cts = 25200,
+						 },
+						 {
+							 .tmds = 27000000,
+							 .n = 6144,
+							 .cts = 27000,
+						 },
+						 {
+							 .tmds = 27027000,
+							 .n = 6144,
+							 .cts = 27027,
+						 },
+						 {
+							 .tmds = 40000000,
+							 .n = 6144,
+							 .cts = 40000,
+						 },
+						 {
+							 .tmds = 54000000,
+							 .n = 6144,
+							 .cts = 54000,
+						 },
+						 {
+							 .tmds = 54054000,
+							 .n = 6144,
+							 .cts = 54054,
+						 },
+						 {
+							 .tmds = 65000000,
+							 .n = 6144,
+							 .cts = 65000,
+						 },
+						 {
+							 .tmds = 74176000,
+							 .n = 11648,
+							 .cts = 140625,
+						 },
+						 {
+							 .tmds = 74250000,
+							 .n = 6144,
+							 .cts = 74250,
+						 },
+						 {
+							 .tmds = 83500000,
+							 .n = 6144,
+							 .cts = 83500,
+						 },
+						 {
+							 .tmds = 106500000,
+							 .n = 6144,
+							 .cts = 106500,
+						 },
+						 {
+							 .tmds = 108000000,
+							 .n = 6144,
+							 .cts = 108000,
+						 },
+						 {
+							 .tmds = 148352000,
+							 .n = 5824,
+							 .cts = 140625,
+						 },
+						 {
+							 .tmds = 148500000,
+							 .n = 6144,
+							 .cts = 148500,
+						 },
+						 {
+							 .tmds = 297000000,
+							 .n = 5120,
+							 .cts = 247500,
+						 } };
 
-static const u16 csc_coeff_default[3][4] = {
-	{ 0x2000, 0x0000, 0x0000, 0x0000 },
-	{ 0x0000, 0x2000, 0x0000, 0x0000 },
-	{ 0x0000, 0x0000, 0x2000, 0x0000 }
-};
+static const u16 csc_coeff_default[3][4] = { { 0x2000, 0x0000, 0x0000, 0x0000 },
+					     { 0x0000, 0x2000, 0x0000, 0x0000 },
+					     { 0x0000, 0x0000, 0x2000,
+					       0x0000 } };
 
 static const u16 csc_coeff_rgb_in_eitu601[3][4] = {
 	{ 0x2591, 0x1322, 0x074b, 0x0000 },
@@ -85,7 +128,7 @@ static void dw_hdmi_write(struct dw_hdmi *hdmi, u8 val, int offset)
 		writel(val, hdmi->ioaddr + (offset << 2));
 		break;
 	default:
-		debug("reg_io_width has unsupported width!\n");
+		blog_info("reg_io_width has unsupported width!\n");
 		break;
 	}
 }
@@ -98,7 +141,7 @@ static u8 dw_hdmi_read(struct dw_hdmi *hdmi, int offset)
 	case 4:
 		return readl(hdmi->ioaddr + (offset << 2));
 	default:
-		debug("reg_io_width has unsupported width!\n");
+		blog_info("reg_io_width has unsupported width!\n");
 		break;
 	}
 
@@ -106,8 +149,8 @@ static u8 dw_hdmi_read(struct dw_hdmi *hdmi, int offset)
 }
 
 static u8 (*hdmi_read)(struct dw_hdmi *hdmi, int offset) = dw_hdmi_read;
-static void (*hdmi_write)(struct dw_hdmi *hdmi, u8 val, int offset) =
-								 dw_hdmi_write;
+static void (*hdmi_write)(struct dw_hdmi *hdmi, u8 val,
+			  int offset) = dw_hdmi_write;
 
 static void hdmi_mod(struct dw_hdmi *hdmi, unsigned reg, u8 mask, u8 data)
 {
@@ -167,7 +210,7 @@ static void hdmi_audio_set_samplerate(struct dw_hdmi *hdmi, u32 pixel_clk)
 
 	index = hdmi_lookup_n_cts(pixel_clk);
 	if (index == -1) {
-		debug("audio not supported for pixel clk %d\n", pixel_clk);
+		blog_info("audio not supported for pixel clk %d\n", pixel_clk);
 		return;
 	}
 
@@ -233,7 +276,7 @@ static void hdmi_video_sample(struct dw_hdmi *hdmi)
 
 	val = HDMI_TX_INVID0_INTERNAL_DE_GENERATOR_DISABLE |
 	      ((color_format << HDMI_TX_INVID0_VIDEO_MAPPING_OFFSET) &
-	      HDMI_TX_INVID0_VIDEO_MAPPING_MASK);
+	       HDMI_TX_INVID0_VIDEO_MAPPING_MASK);
 
 	hdmi_write(hdmi, val, HDMI_TX_INVID0);
 
@@ -259,9 +302,9 @@ static void hdmi_video_packetize(struct dw_hdmi *hdmi)
 
 	/* set the packetizer registers */
 	val = ((color_depth << HDMI_VP_PR_CD_COLOR_DEPTH_OFFSET) &
-		HDMI_VP_PR_CD_COLOR_DEPTH_MASK) |
-		((0 << HDMI_VP_PR_CD_DESIRED_PR_FACTOR_OFFSET) &
-		HDMI_VP_PR_CD_DESIRED_PR_FACTOR_MASK);
+	       HDMI_VP_PR_CD_COLOR_DEPTH_MASK) |
+	      ((0 << HDMI_VP_PR_CD_DESIRED_PR_FACTOR_OFFSET) &
+	       HDMI_VP_PR_CD_DESIRED_PR_FACTOR_MASK);
 	hdmi_write(hdmi, val, HDMI_VP_PR_CD);
 
 	hdmi_mod(hdmi, HDMI_VP_STUFF, HDMI_VP_STUFF_PR_STUFFING_MASK,
@@ -271,26 +314,28 @@ static void hdmi_video_packetize(struct dw_hdmi *hdmi)
 	vp_conf = HDMI_VP_CONF_PR_EN_DISABLE |
 		  HDMI_VP_CONF_BYPASS_SELECT_VID_PACKETIZER;
 
-	hdmi_mod(hdmi, HDMI_VP_CONF, HDMI_VP_CONF_PR_EN_MASK |
-		 HDMI_VP_CONF_BYPASS_SELECT_MASK, vp_conf);
+	hdmi_mod(hdmi, HDMI_VP_CONF,
+		 HDMI_VP_CONF_PR_EN_MASK | HDMI_VP_CONF_BYPASS_SELECT_MASK,
+		 vp_conf);
 
 	hdmi_mod(hdmi, HDMI_VP_STUFF, HDMI_VP_STUFF_IDEFAULT_PHASE_MASK,
 		 1 << HDMI_VP_STUFF_IDEFAULT_PHASE_OFFSET);
 
 	hdmi_write(hdmi, remap_size, HDMI_VP_REMAP);
 
-	vp_conf = HDMI_VP_CONF_BYPASS_EN_ENABLE |
-		  HDMI_VP_CONF_PP_EN_DISABLE |
+	vp_conf = HDMI_VP_CONF_BYPASS_EN_ENABLE | HDMI_VP_CONF_PP_EN_DISABLE |
 		  HDMI_VP_CONF_YCC422_EN_DISABLE;
 
-	hdmi_mod(hdmi, HDMI_VP_CONF, HDMI_VP_CONF_BYPASS_EN_MASK |
-		 HDMI_VP_CONF_PP_EN_ENMASK | HDMI_VP_CONF_YCC422_EN_MASK,
+	hdmi_mod(hdmi, HDMI_VP_CONF,
+		 HDMI_VP_CONF_BYPASS_EN_MASK | HDMI_VP_CONF_PP_EN_ENMASK |
+			 HDMI_VP_CONF_YCC422_EN_MASK,
 		 vp_conf);
 
-	hdmi_mod(hdmi, HDMI_VP_STUFF, HDMI_VP_STUFF_PP_STUFFING_MASK |
-		 HDMI_VP_STUFF_YCC422_STUFFING_MASK,
+	hdmi_mod(hdmi, HDMI_VP_STUFF,
+		 HDMI_VP_STUFF_PP_STUFFING_MASK |
+			 HDMI_VP_STUFF_YCC422_STUFFING_MASK,
 		 HDMI_VP_STUFF_PP_STUFFING_STUFFING_MODE |
-		 HDMI_VP_STUFF_YCC422_STUFFING_STUFFING_MODE);
+			 HDMI_VP_STUFF_YCC422_STUFFING_STUFFING_MODE);
 
 	hdmi_mod(hdmi, HDMI_VP_CONF, HDMI_VP_CONF_OUTPUT_SELECTOR_MASK,
 		 output_select);
@@ -359,20 +404,17 @@ static void hdmi_phy_gen2_pddq(struct dw_hdmi *hdmi, uint enable)
 
 static void hdmi_phy_gen2_txpwron(struct dw_hdmi *hdmi, uint enable)
 {
-	hdmi_mod(hdmi, HDMI_PHY_CONF0,
-		 HDMI_PHY_CONF0_GEN2_TXPWRON_MASK,
+	hdmi_mod(hdmi, HDMI_PHY_CONF0, HDMI_PHY_CONF0_GEN2_TXPWRON_MASK,
 		 enable << HDMI_PHY_CONF0_GEN2_TXPWRON_OFFSET);
 }
 
 static void hdmi_phy_sel_data_en_pol(struct dw_hdmi *hdmi, uint enable)
 {
-	hdmi_mod(hdmi, HDMI_PHY_CONF0,
-		 HDMI_PHY_CONF0_SELDATAENPOL_MASK,
+	hdmi_mod(hdmi, HDMI_PHY_CONF0, HDMI_PHY_CONF0_SELDATAENPOL_MASK,
 		 enable << HDMI_PHY_CONF0_SELDATAENPOL_OFFSET);
 }
 
-static void hdmi_phy_sel_interface_control(struct dw_hdmi *hdmi,
-					   uint enable)
+static void hdmi_phy_sel_interface_control(struct dw_hdmi *hdmi, uint enable)
 {
 	hdmi_mod(hdmi, HDMI_PHY_CONF0, HDMI_PHY_CONF0_SELDIPIF_MASK,
 		 enable << HDMI_PHY_CONF0_SELDIPIF_OFFSET);
@@ -464,28 +506,27 @@ static void hdmi_av_composer(struct dw_hdmi *hdmi,
 	uint vbl;
 
 	hbl = edid->hback_porch.typ + edid->hfront_porch.typ +
-			edid->hsync_len.typ;
+	      edid->hsync_len.typ;
 	vbl = edid->vback_porch.typ + edid->vfront_porch.typ +
-			edid->vsync_len.typ;
+	      edid->vsync_len.typ;
 
 	/* set up hdmi_fc_invidconf */
 	inv_val = HDMI_FC_INVIDCONF_HDCP_KEEPOUT_INACTIVE;
 
 	inv_val |= (edid->flags & DISPLAY_FLAGS_VSYNC_HIGH ?
-		   HDMI_FC_INVIDCONF_VSYNC_IN_POLARITY_ACTIVE_HIGH :
-		   HDMI_FC_INVIDCONF_VSYNC_IN_POLARITY_ACTIVE_LOW);
+			    HDMI_FC_INVIDCONF_VSYNC_IN_POLARITY_ACTIVE_HIGH :
+			    HDMI_FC_INVIDCONF_VSYNC_IN_POLARITY_ACTIVE_LOW);
 
 	inv_val |= (edid->flags & DISPLAY_FLAGS_HSYNC_HIGH ?
-		   HDMI_FC_INVIDCONF_HSYNC_IN_POLARITY_ACTIVE_HIGH :
-		   HDMI_FC_INVIDCONF_HSYNC_IN_POLARITY_ACTIVE_LOW);
+			    HDMI_FC_INVIDCONF_HSYNC_IN_POLARITY_ACTIVE_HIGH :
+			    HDMI_FC_INVIDCONF_HSYNC_IN_POLARITY_ACTIVE_LOW);
 
 	inv_val |= (mdataenablepolarity ?
-		   HDMI_FC_INVIDCONF_DE_IN_POLARITY_ACTIVE_HIGH :
-		   HDMI_FC_INVIDCONF_DE_IN_POLARITY_ACTIVE_LOW);
+			    HDMI_FC_INVIDCONF_DE_IN_POLARITY_ACTIVE_HIGH :
+			    HDMI_FC_INVIDCONF_DE_IN_POLARITY_ACTIVE_LOW);
 
-	inv_val |= (edid->hdmi_monitor ?
-		   HDMI_FC_INVIDCONF_DVI_MODEZ_HDMI_MODE :
-		   HDMI_FC_INVIDCONF_DVI_MODEZ_DVI_MODE);
+	inv_val |= (edid->hdmi_monitor ? HDMI_FC_INVIDCONF_DVI_MODEZ_HDMI_MODE :
+					 HDMI_FC_INVIDCONF_DVI_MODEZ_DVI_MODE);
 
 	inv_val |= HDMI_FC_INVIDCONF_R_V_BLANK_IN_OSC_ACTIVE_LOW;
 
@@ -627,7 +668,7 @@ static int is_color_space_conversion(struct dw_hdmi *hdmi)
 
 static void dw_hdmi_update_csc_coeffs(struct dw_hdmi *hdmi)
 {
-	const u16 (*csc_coeff)[3][4] = &csc_coeff_default;
+	const u16(*csc_coeff)[3][4] = &csc_coeff_default;
 	unsigned int i;
 	u32 csc_scale = 1;
 
@@ -635,7 +676,7 @@ static void dw_hdmi_update_csc_coeffs(struct dw_hdmi *hdmi)
 		if (hdmi_bus_fmt_is_rgb(hdmi->hdmi_data.enc_out_bus_format)) {
 			csc_coeff = &csc_coeff_rgb_out_eitu601;
 		} else if (hdmi_bus_fmt_is_rgb(
-					hdmi->hdmi_data.enc_in_bus_format)) {
+				   hdmi->hdmi_data.enc_in_bus_format)) {
 			csc_coeff = &csc_coeff_rgb_in_eitu601;
 			csc_scale = 0;
 		}
@@ -762,9 +803,10 @@ static void hdmi_audio_set_format(struct dw_hdmi *hdmi)
 	hdmi_write(hdmi, HDMI_AUD_CONF0_I2S_SELECT | HDMI_AUD_CONF0_I2S_IN_EN_0,
 		   HDMI_AUD_CONF0);
 
-
-	hdmi_write(hdmi, HDMI_AUD_CONF1_I2S_MODE_STANDARD_MODE |
-		   HDMI_AUD_CONF1_I2S_WIDTH_16BIT, HDMI_AUD_CONF1);
+	hdmi_write(hdmi,
+		   HDMI_AUD_CONF1_I2S_MODE_STANDARD_MODE |
+			   HDMI_AUD_CONF1_I2S_WIDTH_16BIT,
+		   HDMI_AUD_CONF1);
 
 	hdmi_write(hdmi, 0x00, HDMI_AUD_CONF2);
 }
@@ -819,9 +861,8 @@ static int hdmi_read_edid(struct dw_hdmi *hdmi, int block, u8 *buff)
 	if (CONFIG_IS_ENABLED(DM_I2C) && hdmi->ddc_bus) {
 		struct udevice *chip;
 
-		edid_read_err = i2c_get_chip(hdmi->ddc_bus,
-					     HDMI_I2CM_SLAVE_DDC_ADDR,
-					     1, &chip);
+		edid_read_err = i2c_get_chip(
+			hdmi->ddc_bus, HDMI_I2CM_SLAVE_DDC_ADDR, 1, &chip);
 		if (edid_read_err)
 			return edid_read_err;
 
@@ -868,38 +909,28 @@ static int hdmi_read_edid(struct dw_hdmi *hdmi, int block, u8 *buff)
 }
 
 static const u8 pre_buf[] = {
-	0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00,
-	0x04, 0x69, 0xfa, 0x23, 0xc8, 0x28, 0x01, 0x00,
-	0x10, 0x17, 0x01, 0x03, 0x80, 0x33, 0x1d, 0x78,
-	0x2a, 0xd9, 0x45, 0xa2, 0x55, 0x4d, 0xa0, 0x27,
-	0x12, 0x50, 0x54, 0xb7, 0xef, 0x00, 0x71, 0x4f,
-	0x81, 0x40, 0x81, 0x80, 0x95, 0x00, 0xb3, 0x00,
-	0xd1, 0xc0, 0x81, 0xc0, 0x81, 0x00, 0x02, 0x3a,
-	0x80, 0x18, 0x71, 0x38, 0x2d, 0x40, 0x58, 0x2c,
-	0x45, 0x00, 0xfd, 0x1e, 0x11, 0x00, 0x00, 0x1e,
-	0x00, 0x00, 0x00, 0xff, 0x00, 0x44, 0x34, 0x4c,
-	0x4d, 0x54, 0x46, 0x30, 0x37, 0x35, 0x39, 0x37,
-	0x36, 0x0a, 0x00, 0x00, 0x00, 0xfd, 0x00, 0x32,
-	0x4b, 0x18, 0x53, 0x11, 0x00, 0x0a, 0x20, 0x20,
-	0x20, 0x20, 0x20, 0x20, 0x00, 0x00, 0x00, 0xfc,
-	0x00, 0x41, 0x53, 0x55, 0x53, 0x20, 0x56, 0x53,
-	0x32, 0x33, 0x38, 0x0a, 0x20, 0x20, 0x01, 0xb0,
-	0x02, 0x03, 0x22, 0x71, 0x4f, 0x01, 0x02, 0x03,
-	0x11, 0x12, 0x13, 0x04, 0x14, 0x05, 0x0e, 0x0f,
-	0x1d, 0x1e, 0x1f, 0x10, 0x23, 0x09, 0x17, 0x07,
-	0x83, 0x01, 0x00, 0x00, 0x65, 0x03, 0x0c, 0x00,
-	0x10, 0x00, 0x8c, 0x0a, 0xd0, 0x8a, 0x20, 0xe0,
-	0x2d, 0x10, 0x10, 0x3e, 0x96, 0x00, 0xfd, 0x1e,
-	0x11, 0x00, 0x00, 0x18, 0x01, 0x1d, 0x00, 0x72,
-	0x51, 0xd0, 0x1e, 0x20, 0x6e, 0x28, 0x55, 0x00,
-	0xfd, 0x1e, 0x11, 0x00, 0x00, 0x1e, 0x01, 0x1d,
-	0x00, 0xbc, 0x52, 0xd0, 0x1e, 0x20, 0xb8, 0x28,
-	0x55, 0x40, 0xfd, 0x1e, 0x11, 0x00, 0x00, 0x1e,
-	0x8c, 0x0a, 0xd0, 0x90, 0x20, 0x40, 0x31, 0x20,
-	0x0c, 0x40, 0x55, 0x00, 0xfd, 0x1e, 0x11, 0x00,
-	0x00, 0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe9,
+	0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x04, 0x69, 0xfa, 0x23,
+	0xc8, 0x28, 0x01, 0x00, 0x10, 0x17, 0x01, 0x03, 0x80, 0x33, 0x1d, 0x78,
+	0x2a, 0xd9, 0x45, 0xa2, 0x55, 0x4d, 0xa0, 0x27, 0x12, 0x50, 0x54, 0xb7,
+	0xef, 0x00, 0x71, 0x4f, 0x81, 0x40, 0x81, 0x80, 0x95, 0x00, 0xb3, 0x00,
+	0xd1, 0xc0, 0x81, 0xc0, 0x81, 0x00, 0x02, 0x3a, 0x80, 0x18, 0x71, 0x38,
+	0x2d, 0x40, 0x58, 0x2c, 0x45, 0x00, 0xfd, 0x1e, 0x11, 0x00, 0x00, 0x1e,
+	0x00, 0x00, 0x00, 0xff, 0x00, 0x44, 0x34, 0x4c, 0x4d, 0x54, 0x46, 0x30,
+	0x37, 0x35, 0x39, 0x37, 0x36, 0x0a, 0x00, 0x00, 0x00, 0xfd, 0x00, 0x32,
+	0x4b, 0x18, 0x53, 0x11, 0x00, 0x0a, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
+	0x00, 0x00, 0x00, 0xfc, 0x00, 0x41, 0x53, 0x55, 0x53, 0x20, 0x56, 0x53,
+	0x32, 0x33, 0x38, 0x0a, 0x20, 0x20, 0x01, 0xb0, 0x02, 0x03, 0x22, 0x71,
+	0x4f, 0x01, 0x02, 0x03, 0x11, 0x12, 0x13, 0x04, 0x14, 0x05, 0x0e, 0x0f,
+	0x1d, 0x1e, 0x1f, 0x10, 0x23, 0x09, 0x17, 0x07, 0x83, 0x01, 0x00, 0x00,
+	0x65, 0x03, 0x0c, 0x00, 0x10, 0x00, 0x8c, 0x0a, 0xd0, 0x8a, 0x20, 0xe0,
+	0x2d, 0x10, 0x10, 0x3e, 0x96, 0x00, 0xfd, 0x1e, 0x11, 0x00, 0x00, 0x18,
+	0x01, 0x1d, 0x00, 0x72, 0x51, 0xd0, 0x1e, 0x20, 0x6e, 0x28, 0x55, 0x00,
+	0xfd, 0x1e, 0x11, 0x00, 0x00, 0x1e, 0x01, 0x1d, 0x00, 0xbc, 0x52, 0xd0,
+	0x1e, 0x20, 0xb8, 0x28, 0x55, 0x40, 0xfd, 0x1e, 0x11, 0x00, 0x00, 0x1e,
+	0x8c, 0x0a, 0xd0, 0x90, 0x20, 0x40, 0x31, 0x20, 0x0c, 0x40, 0x55, 0x00,
+	0xfd, 0x1e, 0x11, 0x00, 0x00, 0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0xe9,
 };
 
 int dw_hdmi_phy_cfg(struct dw_hdmi *hdmi, uint mpixelclock)
@@ -915,7 +946,7 @@ int dw_hdmi_phy_cfg(struct dw_hdmi *hdmi, uint mpixelclock)
 
 		ret = hdmi_phy_configure(hdmi, mpixelclock);
 		if (ret) {
-			debug("hdmi phy config failure %d\n", ret);
+			blog_info("hdmi phy config failure %d\n", ret);
 			return ret;
 		}
 	}
@@ -944,8 +975,9 @@ void dw_hdmi_phy_init(struct dw_hdmi *hdmi)
 		   HDMI_PHY_I2CM_INT_ADDR);
 
 	/* enable phy i2cm nack & arbitration error irq */
-	hdmi_write(hdmi, HDMI_PHY_I2CM_CTLINT_ADDR_NAC_POL |
-		   HDMI_PHY_I2CM_CTLINT_ADDR_ARBITRATION_POL,
+	hdmi_write(hdmi,
+		   HDMI_PHY_I2CM_CTLINT_ADDR_NAC_POL |
+			   HDMI_PHY_I2CM_CTLINT_ADDR_ARBITRATION_POL,
 		   HDMI_PHY_I2CM_CTLINT_ADDR);
 
 	/* enable cable hot plug irq */
@@ -953,7 +985,6 @@ void dw_hdmi_phy_init(struct dw_hdmi *hdmi)
 
 	/* clear hotplug interrupts */
 	hdmi_write(hdmi, HDMI_IH_PHY_STAT0_HPD, HDMI_IH_PHY_STAT0);
-
 }
 
 int dw_hdmi_read_edid(struct dw_hdmi *hdmi, u8 *buf, int buf_size)
@@ -967,7 +998,7 @@ int dw_hdmi_read_edid(struct dw_hdmi *hdmi, u8 *buf, int buf_size)
 	} else {
 		ret = hdmi_read_edid(hdmi, 0, buf);
 		if (ret) {
-			debug("failed to read edid.\n");
+			blog_info("failed to read edid.\n");
 			return -1;
 		}
 
@@ -984,9 +1015,9 @@ int dw_hdmi_enable(struct dw_hdmi *hdmi, const struct display_timing *edid)
 {
 	int ret;
 
-	debug("%s, mode info : clock %d hdis %d vdis %d\n",
-	      edid->hdmi_monitor ? "hdmi" : "dvi",
-	      edid->pixelclock.typ, edid->hactive.typ, edid->vactive.typ);
+	blog_info("%s, mode info : clock %d hdis %d vdis %d\n",
+		  edid->hdmi_monitor ? "hdmi" : "dvi", edid->pixelclock.typ,
+		  edid->hactive.typ, edid->vactive.typ);
 
 	hdmi_av_composer(hdmi, edid);
 
@@ -1014,6 +1045,8 @@ int dw_hdmi_enable(struct dw_hdmi *hdmi, const struct display_timing *edid)
 void dw_hdmi_init(struct dw_hdmi *hdmi)
 {
 	uint ih_mute;
+	char *phy_name;
+	u8 config0_id, config1_id, config2_id, config3_id;
 
 	/*
 	 * boot up defaults are:
@@ -1023,16 +1056,83 @@ void dw_hdmi_init(struct dw_hdmi *hdmi)
 	 * disable top level interrupt bits in hdmi block
 	 */
 	ih_mute = /*hdmi_read(hdmi, HDMI_IH_MUTE) |*/
-		  HDMI_IH_MUTE_MUTE_WAKEUP_INTERRUPT |
-		  HDMI_IH_MUTE_MUTE_ALL_INTERRUPT;
+		HDMI_IH_MUTE_MUTE_WAKEUP_INTERRUPT |
+		HDMI_IH_MUTE_MUTE_ALL_INTERRUPT;
 
 	if (hdmi->write_reg)
 		hdmi_write = hdmi->write_reg;
 
-	printf("hdmi_write:%#x\n", hdmi_write);
 	if (hdmi->read_reg)
 		hdmi_read = hdmi->read_reg;
-	printf("hdmi_read:%#x\n", hdmi_read);
+
+	blog_info("===== HDMI ID =====\n");
+	blog_info("    Design ID:%#x\n", hdmi_read(hdmi, HDMI_DESIGN_ID));
+	blog_info("   Version ID:%#x\n", hdmi_read(hdmi, HDMI_REVISION_ID));
+	blog_info("  Product ID0:%#x\n", hdmi_read(hdmi, HDMI_PRODUCT_ID0));
+	blog_info("  Product ID1:%#x\n", hdmi_read(hdmi, HDMI_PRODUCT_ID1));
+	config0_id = hdmi_read(hdmi, HDMI_CONFIG0_ID);
+	config1_id = hdmi_read(hdmi, HDMI_CONFIG1_ID);
+	config2_id = hdmi_read(hdmi, HDMI_CONFIG2_ID);
+	config3_id = hdmi_read(hdmi, HDMI_CONFIG3_ID);
+	blog_info("   Config ID0:%#x\n", config0_id);
+	blog_info("            - [7]:%s\n",
+		  config0_id & INTER_PIXEL ? "HDMI_TX_INTPREPEN" : "null");
+	blog_info("            - [5]:%s\n",
+		  config0_id & AUDSPIDIF ? "SPDIFPORTS" : "null");
+	blog_info("            - [4]:%s\n",
+		  config0_id & I2SPORT ? "I2SPORTS" : "null");
+	blog_info("            - [3]:%s\n",
+		  config0_id & HDMI_1_4 ? "HDMI_1_4" : "null");
+	blog_info("            - [2]:%s\n", config0_id & CSC ? "CSC" : "null");
+	blog_info("            - [1]:%s\n", config0_id & CEC ? "CEC" : "null");
+	blog_info("            - [0]:%s\n",
+		  config0_id & HDCP ? "HDCP" : "null");
+	blog_info("   Config ID1:%#x\n", config1_id);
+	blog_info("            - [7]:%s\n",
+		  config1_id & HDCP22_SNPS ? "HDCP22_SNPS" : "null");
+	blog_info("            - [6]:%s\n",
+		  config1_id & HDCP22_EXT ? "HDCP22_EXT" : "null");
+	blog_info("            - [5]:%s\n",
+		  config1_id & HDMI20 ? "HDMI20" : "null");
+	blog_info("            - [1]:%s\n", config1_id & APB ? "APB" : "null");
+	blog_info("   Config ID2:%#x\n", config2_id);
+	switch (config2_id) {
+	case 0x00:
+		phy_name = "PHY_TYPE_LEGACY";
+		break;
+	case 0xF2:
+		phy_name = "PHY_TYPE_GEN2";
+		break;
+	case 0xE2:
+		phy_name = "PHY_TYPE_GEN2_HEAC";
+		break;
+	case 0xC2:
+		phy_name = "PHY_TYPE_MHL_COMBO";
+		break;
+	case 0xB2:
+		phy_name = "PHY_TYPE_MHL_COMBO_HEAC";
+		break;
+	case 0xF3:
+		phy_name = "PHY_TYPE_HDMI20";
+		break;
+	case 0xE3:
+		phy_name = "PHY_TYPE_HDMI20_HEAC";
+		break;
+	case 0xFE:
+		phy_name = "PHY_TYPE_EXT";
+		break;
+	default:
+		phy_name = "PHY_TYPE_LEGACY";
+		break;
+	}
+	blog_info("          - [7:0]:%s\n", phy_name);
+	blog_info("   Config ID3:%#x\n", config3_id);
+	blog_info("           - [1]:%s\n", config3_id & CONF_AHB_AUDIO_DMA ?
+						   "CONF_AHB_AUDIO_DMA" :
+						   "null");
+	blog_info("           - [0]:%s\n",
+		  config3_id & CONF_GPAUD ? "CONF_GPAUD" : "null");
+
 	hdmi_write(hdmi, ih_mute, HDMI_IH_MUTE);
 
 	/* enable i2c master done irq */

@@ -115,7 +115,7 @@ int rk_hdmi_probe(struct udevice *dev)
 
 	ret = dw_hdmi_phy_wait_for_hpd(hdmi);
 	if (ret < 0) {
-		debug("hdmi can not get hpd signal\n");
+		blog_info("hdmi can not get hpd signal\n");
 		return -1;
 	}
 
