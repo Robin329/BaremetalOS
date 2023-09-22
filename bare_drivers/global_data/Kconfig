@@ -1,0 +1,9 @@
+#
+# Leds infrastructure and drivers
+#
+
+menuconfig BAREMETAL_GD
+    bool "Global data dump support"
+    default y
+    help
+      Enable support for dump gd.
